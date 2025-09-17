@@ -1,7 +1,8 @@
 import { useState } from "react";
 import GlassCard, { Message } from "@/components/ui/glass-card";
 import { Instagram, Twitter, Github, ChevronDown } from "lucide-react";
-import { WebCrawler } from "@/lib/crawler";
+import { crawlWeb } from "@/api/crawler";
+import { chatWithAI } from "@/api/chat";
 
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -35,9 +36,8 @@ const Index = () => {
                            message.toLowerCase().includes('web');
 
       if (isSearchQuery) {
-        // Use WebCrawler for search queries
-        const crawler = new WebCrawler();
-        const results = await crawler.searchAndCrawl(message, 2);
+        // Use web crawler API for search queries
+        const results = await crawlWeb(message, 2);
         
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -46,34 +46,17 @@ const Index = () => {
           timestamp: new Date()
         };
         setMessages(prev => [...prev, aiMessage]);
-        await crawler.close();
       } else {
-        // Use OpenAI for regular chat
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message })
-        });
+        // Use AI chat API for regular messages
+        const response = await chatWithAI(message);
         
-        if (response.ok) {
-          const data = await response.json();
-          const aiMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            type: 'ai',
-            content: data.response,
-            timestamp: new Date()
-          };
-          setMessages(prev => [...prev, aiMessage]);
-        } else {
-          // Fallback response
-          const aiMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            type: 'ai',
-            content: `I received your message: "${message}". This is a demo response. In a full implementation, this would connect to OpenAI for intelligent responses.`,
-            timestamp: new Date()
-          };
-          setMessages(prev => [...prev, aiMessage]);
-        }
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'ai',
+          content: response.response,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiMessage]);
       }
     } catch (error) {
       console.error('Error processing message:', error);

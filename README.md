@@ -8,7 +8,7 @@ A beautiful 3D glass card interface with AI-powered chat functionality and intel
 
 - **3D Glass Card Interface** - Stunning 3D hover effects with glass morphism design
 - **AI-Powered Chat** - Intelligent conversations with OpenAI integration
-- **Web Crawling** - Smart web crawling with Playwright for data extraction
+- **Web Crawling** - Smart web crawling with mock API (ready for backend integration)
 - **Real-time Data Storage** - Supabase integration for persistent data
 - **Responsive Design** - Works seamlessly across all devices
 - **Modern UI/UX** - Built with Shadcn UI and Tailwind CSS
@@ -59,9 +59,9 @@ A beautiful 3D glass card interface with AI-powered chat functionality and intel
 
 - **Frontend**: React 18, TypeScript, Vite
 - **Styling**: Tailwind CSS, Shadcn UI
-- **AI**: OpenAI GPT API
-- **Web Crawling**: Playwright
-- **Database**: Supabase
+- **AI**: OpenAI GPT API (mock implementation)
+- **Web Crawling**: Mock API (ready for Playwright backend)
+- **Database**: Supabase (mock implementation)
 - **Icons**: Lucide React
 
 ## 📁 Project Structure
