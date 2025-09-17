@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Instagram, Twitter, Github, ChevronDown, Send } from "lucide-react";
+import { Instagram, Twitter, Github, ChevronDown, Send, Settings, Download, Upload, Search, Sparkles, BarChart3, HelpCircle } from "lucide-react";
 import spiderImage from "@/assets/spider.png";
 
 const ULogo = (props: React.SVGProps<SVGSVGElement>) => (
@@ -25,12 +25,19 @@ export interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   onSendMessage?: (message: string) => void;
   messages?: Message[];
   isLoading?: boolean;
+  onSettingsClick?: () => void;
+  onFileUpload?: (file: File) => void;
+  onSearchClick?: () => void;
+  onDashboardClick?: () => void;
+  onHelpClick?: () => void;
 }
 
 const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
-  ({ className, onSendMessage, messages = [], isLoading = false, ...props }, ref) => {
+  ({ className, onSendMessage, messages = [], isLoading = false, onSettingsClick, onFileUpload, onSearchClick, onDashboardClick, onHelpClick, ...props }, ref) => {
     const [inputValue, setInputValue] = React.useState('');
+    const [showActions, setShowActions] = React.useState(false);
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     React.useEffect(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -49,6 +56,27 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
         handleSendMessage();
       }
     };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && onFileUpload) {
+        onFileUpload(file);
+      }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const file = e.dataTransfer.files[0];
+      if (file && onFileUpload) {
+        onFileUpload(file);
+      }
+    };
     return (
       <div
         ref={ref}
@@ -60,38 +88,113 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
           <div className="absolute [transform:translate3d(0,0,26px)] h-full w-full flex flex-col">
             {/* Header */}
             <div className="px-7 pt-6 pb-3">
-              <span className="block text-xl font-black text-white">
-                Tooltip Companion
-              </span>
-              <div className="text-xs text-zinc-400 mt-1">
-                AI-powered browsing with 3D effects
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="block text-xl font-black text-white">
+                    Tooltip Companion
+                  </span>
+                  <div className="text-xs text-zinc-400 mt-1">
+                    AI-powered browsing with 3D effects
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={onSearchClick}
+                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                    title="Search"
+                  >
+                    <Search className="h-4 w-4 text-white" />
+                  </button>
+                  <button
+                    onClick={() => setShowActions(!showActions)}
+                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                    title="More actions"
+                  >
+                    <Sparkles className="h-4 w-4 text-white" />
+                  </button>
+                  <button
+                    onClick={onDashboardClick}
+                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                    title="Analytics Dashboard"
+                  >
+                    <BarChart3 className="h-4 w-4 text-white" />
+                  </button>
+                  <button
+                    onClick={onSettingsClick}
+                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                    title="Settings"
+                  >
+                    <Settings className="h-4 w-4 text-white" />
+                  </button>
+                  <button
+                    onClick={onHelpClick}
+                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                    title="Help & Shortcuts"
+                  >
+                    <HelpCircle className="h-4 w-4 text-white" />
+                  </button>
+                </div>
               </div>
+              
+              {/* Action buttons */}
+              {showActions && (
+                <div className="mt-3 flex gap-2 animate-in slide-in-from-top-2 duration-200">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-full text-xs text-white transition-colors"
+                  >
+                    <Upload className="h-3 w-3" />
+                    Upload
+                  </button>
+                  <button
+                    className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-full text-xs text-white transition-colors"
+                  >
+                    <Download className="h-3 w-3" />
+                    Export
+                  </button>
+                </div>
+              )}
             </div>
             
             {/* Chat Messages */}
-            <div className="flex-1 px-7 py-2 overflow-y-auto space-y-2">
-              {messages.map((message) => (
+            <div className="flex-1 px-7 py-2 overflow-y-auto space-y-3">
+              {messages.map((message, index) => (
                 <div
                   key={message.id}
-                  className={`p-2 rounded-lg text-xs ${
+                  className={`p-3 rounded-xl text-sm transition-all duration-300 hover:scale-[1.02] ${
                     message.type === 'user'
-                      ? 'bg-blue-500/20 text-blue-100 ml-4'
-                      : 'bg-white/10 text-white mr-4'
+                      ? 'bg-gradient-to-r from-blue-500/20 to-blue-600/20 text-blue-100 ml-6 border border-blue-400/20'
+                      : 'bg-gradient-to-r from-white/10 to-white/5 text-white mr-6 border border-white/10'
                   }`}
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="text-xs opacity-70 mb-1">
-                    {message.type === 'user' ? 'You' : 'AI'} • {message.timestamp.toLocaleTimeString()}
+                  <div className="flex items-center gap-2 text-xs opacity-70 mb-2">
+                    <div className={`w-2 h-2 rounded-full ${
+                      message.type === 'user' ? 'bg-blue-400' : 'bg-green-400'
+                    }`}></div>
+                    <span className="font-medium">
+                      {message.type === 'user' ? 'You' : 'AI Assistant'}
+                    </span>
+                    <span>•</span>
+                    <span>{message.timestamp.toLocaleTimeString()}</span>
                   </div>
-                  <div>{message.content}</div>
+                  <div className="whitespace-pre-wrap leading-relaxed">
+                    {message.content}
+                  </div>
                 </div>
               ))}
               {isLoading && (
-                <div className="p-2 rounded-lg bg-white/10 text-white mr-4">
-                  <div className="text-xs opacity-70 mb-1">AI • Now</div>
+                <div className="p-3 rounded-xl bg-gradient-to-r from-white/10 to-white/5 text-white mr-6 border border-white/10 animate-pulse">
+                  <div className="flex items-center gap-2 text-xs opacity-70 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                    <span className="font-medium">AI Assistant</span>
+                    <span>•</span>
+                    <span>Thinking...</span>
+                  </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-1 h-1 bg-white rounded-full animate-bounce"></div>
-                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               )}
@@ -100,10 +203,14 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
             
             {/* Input Area */}
             <div className="px-7 pb-6">
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
+              <div 
+                className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20 hover:border-white/30 transition-colors"
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+              >
                 <input 
                   type="text" 
-                  placeholder="Ask me anything..."
+                  placeholder="Ask me anything or drag & drop a file..."
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -111,10 +218,27 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
                 />
                 <button 
                   onClick={handleSendMessage}
-                  className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                  disabled={!inputValue.trim() || isLoading}
+                  className="p-1 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="h-4 w-4 text-white" />
                 </button>
+              </div>
+              
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileUpload}
+                className="hidden"
+                accept=".txt,.pdf,.doc,.docx,.md,.json,.csv"
+              />
+              
+              {/* Quick actions */}
+              <div className="mt-2 flex gap-2 text-xs text-zinc-400">
+                <span>Press Enter to send</span>
+                <span>•</span>
+                <span>Drag files to upload</span>
               </div>
             </div>
           </div>

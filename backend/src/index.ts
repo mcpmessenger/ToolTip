@@ -7,12 +7,18 @@ import { crawlRouter } from './routes/crawl';
 // Load environment variables
 dotenv.config();
 
+// Debug environment variables
+console.log('Environment variables loaded:');
+console.log('OPENAI_API_KEY exists:', !!process.env.OPENAI_API_KEY);
+console.log('OPENAI_API_KEY length:', process.env.OPENAI_API_KEY?.length || 0);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082'],
+  origin: true, // Allow all origins in development
   credentials: true
 }));
 app.use(express.json());

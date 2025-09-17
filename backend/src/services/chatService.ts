@@ -1,12 +1,26 @@
 import OpenAI from 'openai';
 import { supabase } from '../config/supabase';
 
-// Initialize OpenAI only if API key is available
-const openai = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your_openai_api_key_here'
-  ? new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    })
-  : null;
+// Lazy initialization of OpenAI - will be created when first needed
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI | null {
+  if (openai === null) {
+    // Check if API key is available
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (apiKey && 
+        apiKey !== 'your_openai_api_key_here' &&
+        apiKey.trim() !== '') {
+      openai = new OpenAI({
+        apiKey: apiKey
+      });
+      console.log('OpenAI initialized successfully');
+    } else {
+      console.log('OpenAI not configured, using mock response');
+    }
+  }
+  return openai;
+}
 
 export interface ChatResponse {
   content: string;
@@ -21,7 +35,8 @@ export interface ChatResponse {
 export class ChatService {
   async generateResponse(message: string): Promise<ChatResponse> {
     try {
-      if (!openai) {
+      const openaiClient = getOpenAI();
+      if (!openaiClient) {
         console.log('OpenAI not configured, using mock response');
         const mockResponse = this.generateMockResponse(message);
         await this.saveChatMessage(message, mockResponse);
@@ -32,7 +47,7 @@ export class ChatService {
       }
 
       // Generate AI response using OpenAI
-      const completion = await openai!.chat.completions.create({
+      const completion = await openaiClient.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
           {

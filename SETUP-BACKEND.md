@@ -31,6 +31,7 @@ PORT=3001
 NODE_ENV=development
 
 # OpenAI Configuration (REQUIRED)
+# IMPORTANT: Put your API key on a single line without line breaks
 OPENAI_API_KEY=sk-your-actual-openai-api-key-here
 
 # Supabase Configuration (OPTIONAL)
@@ -40,6 +41,11 @@ SUPABASE_ANON_KEY=your-supabase-anon-key
 # CORS Configuration
 FRONTEND_URL=http://localhost:8082
 ```
+
+**⚠️ Important Notes:**
+- Make sure your OpenAI API key is on a **single line** without any line breaks
+- The API key should start with `sk-` and be the complete key
+- If you copy-paste the key and it gets split across lines, it won't work
 
 ### 3. Set Up Database (Optional)
 
@@ -137,9 +143,11 @@ The frontend automatically connects to `http://localhost:3001` for the backend A
 - Check environment variables are set correctly
 
 ### OpenAI API Errors
-- Verify your API key is correct
+- Verify your API key is correct and on a single line
 - Check you have credits in your OpenAI account
 - Ensure the key has the right permissions
+- **Common Issue**: API key split across multiple lines - fix by putting it on one line
+- **Debug**: Check backend logs for "OpenAI initialized successfully" message
 
 ### Web Crawling Issues
 - Playwright browsers are installed automatically

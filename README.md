@@ -36,32 +36,49 @@ A beautiful 3D glass card interface with AI-powered chat functionality and intel
    ```
 
 3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
    
-   Add your API keys to `.env`:
+   **Frontend (.env in root directory):**
    ```env
    VITE_OPENAI_API_KEY=your_openai_api_key_here
    VITE_SUPABASE_URL=your_supabase_url_here
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+   VITE_API_BASE_URL=http://localhost:3001
+   ```
+   
+   **Backend (backend/.env):**
+   ```env
+   OPENAI_API_KEY=your_openai_api_key_here
+   SUPABASE_URL=your_supabase_url_here
+   SUPABASE_ANON_KEY=your_supabase_anon_key_here
+   PORT=3001
+   NODE_ENV=development
+   FRONTEND_URL=http://localhost:8082
    ```
 
-4. **Start the development server**
+4. **Start both servers**
+   
+   **Terminal 1 - Backend:**
+   ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
+   
+   **Terminal 2 - Frontend:**
    ```bash
    npm run dev
    ```
 
 5. **Open your browser**
-   Navigate to `http://localhost:8081`
+   Navigate to `http://localhost:8082` (or the port shown in terminal)
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18, TypeScript, Vite
 - **Styling**: Tailwind CSS, Shadcn UI
-- **AI**: OpenAI GPT API (mock implementation)
-- **Web Crawling**: Mock API (ready for Playwright backend)
-- **Database**: Supabase (mock implementation)
+- **AI**: OpenAI GPT API (real implementation)
+- **Web Crawling**: Playwright backend integration
+- **Database**: Supabase (real implementation)
 - **Icons**: Lucide React
 
 ## 📁 Project Structure

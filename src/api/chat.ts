@@ -19,7 +19,7 @@ const API_BASE_URL = 'http://localhost:3001';
 
 export async function chatWithAI(message: string): Promise<ChatResponse> {
   try {
-    console.log(`Sending chat message: "${message}"`);
+    console.log(`Sending chat message: "${message}" to ${API_BASE_URL}/api/chat`);
     
     const response = await fetch(`${API_BASE_URL}/api/chat`, {
       method: 'POST',
@@ -31,11 +31,16 @@ export async function chatWithAI(message: string): Promise<ChatResponse> {
       })
     });
 
+    console.log('Response status:', response.status);
+    console.log('Response headers:', response.headers);
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log('Response data:', data);
+    
     return {
       response: data.response,
       timestamp: data.timestamp,
@@ -43,6 +48,11 @@ export async function chatWithAI(message: string): Promise<ChatResponse> {
     };
   } catch (error) {
     console.error('Chat API error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     
     // Fallback to mock response if backend is not available
     console.log('Falling back to mock response...');

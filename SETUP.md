@@ -37,8 +37,7 @@ npx playwright install
 
 ### 5. Environment Variables
 
-Create a `.env` file in the root directory:
-
+**Frontend (.env in root directory):**
 ```env
 # OpenAI Configuration
 VITE_OPENAI_API_KEY=your_openai_api_key_here
@@ -47,15 +46,46 @@ VITE_OPENAI_API_KEY=your_openai_api_key_here
 VITE_SUPABASE_URL=your_supabase_url_here
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
+# API Configuration
+VITE_API_BASE_URL=http://localhost:3001
+
 # Application Configuration
 VITE_APP_NAME=Smart Web Crawler
 ```
 
+**Backend (backend/.env):**
+```env
+# Server Configuration
+PORT=3001
+NODE_ENV=development
+
+# OpenAI Configuration (REQUIRED)
+# IMPORTANT: Put your API key on a single line without line breaks
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Supabase Configuration (OPTIONAL)
+SUPABASE_URL=your_supabase_url_here
+SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# CORS Configuration
+FRONTEND_URL=http://localhost:8082
+```
+
 ### 6. Run the Application
 
+**Start Backend (Terminal 1):**
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+**Start Frontend (Terminal 2):**
 ```bash
 npm run dev
 ```
+
+The application will be available at `http://localhost:8082`
 
 ## Features
 
