@@ -184,3 +184,12 @@ backend/gifs/
 backend/screenshots/
 *.gif
 *.png
+
+# Amplify optimization - exclude large build artifacts
+backend/.serverless/
+*.zip
+*.tar.gz
+
+# Large assets that shouldn't be in git
+black.png
+spider.png
