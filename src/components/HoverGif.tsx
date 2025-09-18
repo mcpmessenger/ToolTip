@@ -50,8 +50,8 @@ export const HoverGif: React.FC<HoverGifProps> = ({
         }
       }
 
-      // Fallback to regular crawl
-      const response = await fetch(`${API_BASE_URL}/api/crawl`, {
+      // Fallback to GIF crawl
+      const response = await fetch(`${API_BASE_URL}/api/gif-crawl`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
