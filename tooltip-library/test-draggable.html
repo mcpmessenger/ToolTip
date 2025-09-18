@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable Tooltip Test</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        .draggable-tooltip {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            cursor: move;
+            user-select: none;
+            z-index: 1000;
+            min-width: 200px;
+            min-height: 100px;
+            resize: both;
+            overflow: auto;
+        }
+
+        .drag-handle {
+            background: rgba(255, 255, 255, 0.2);
+            height: 30px;
+            border-radius: 10px 10px 0 0;
+            margin: -1.5rem -1.5rem 1rem -1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: se-resize;
+            border-radius: 0 0 15px 0;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+
+        .log-container {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .log-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            color: #00ff88;
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        h1 {
+            color: white;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-align: center;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        h3 {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            color: white;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .key {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 5px;
+            margin-right: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useRef, useCallback, useEffect } = React;
+
+        const DraggableTooltip = ({ 
+            id, 
+            initialPosition, 
+            initialSize, 
+            onDrag, 
+            onResize, 
+            onClose, 
+            minWidth = 200, 
+            minHeight = 100, 
+            maxWidth = 600, 
+            maxHeight = 400,
+            children 
+        }) => {
+            const [position, setPosition] = useState(initialPosition);
+            const [size, setSize] = useState(initialSize);
+            const [isDragging, setIsDragging] = useState(false);
+            const [isResizing, setIsResizing] = useState(false);
+            const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+            const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+            const tooltipRef = useRef(null);
+
+            const handleMouseDown = useCallback((e) => {
+                if (e.target.classList.contains('drag-handle')) {
+                    setIsDragging(true);
+                    setDragStart({
+                        x: e.clientX - position.x,
+                        y: e.clientY - position.y
+                    });
+                    e.preventDefault();
+                } else if (e.target.classList.contains('resize-handle')) {
+                    setIsResizing(true);
+                    setResizeStart({
+                        x: e.clientX,
+                        y: e.clientY,
+                        width: size.width,
+                        height: size.height
+                    });
+                    e.preventDefault();
+                }
+            }, [position, size]);
+
+            const handleMouseMove = useCallback((e) => {
+                if (isDragging) {
+                    const newX = e.clientX - dragStart.x;
+                    const newY = e.clientY - dragStart.y;
+                    const newPosition = { x: newX, y: newY };
+                    setPosition(newPosition);
+                    onDrag?.(newPosition);
+                } else if (isResizing) {
+                    const newWidth = Math.max(minWidth, Math.min(maxWidth, resizeStart.width + (e.clientX - resizeStart.x)));
+                    const newHeight = Math.max(minHeight, Math.min(maxHeight, resizeStart.height + (e.clientY - resizeStart.y)));
+                    const newSize = { width: newWidth, height: newHeight };
+                    setSize(newSize);
+                    onResize?.(newSize);
+                }
+            }, [isDragging, isResizing, dragStart, resizeStart, minWidth, maxWidth, minHeight, maxHeight, onDrag, onResize]);
+
+            const handleMouseUp = useCallback(() => {
+                setIsDragging(false);
+                setIsResizing(false);
+            }, []);
+
+            useEffect(() => {
+                if (isDragging || isResizing) {
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                    return () => {
+                        document.removeEventListener('mousemove', handleMouseMove);
+                        document.removeEventListener('mouseup', handleMouseUp);
+                    };
+                }
+            }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
+
+            return (
+                <div
+                    ref={tooltipRef}
+                    className="draggable-tooltip"
+                    style={{
+                        left: position.x,
+                        top: position.y,
+                        width: size.width,
+                        height: size.height
+                    }}
+                    onMouseDown={handleMouseDown}
+                >
+                    <div className="drag-handle">
+                        <span style={{ color: 'white', fontSize: '0.8rem' }}>⋮⋮</span>
+                    </div>
+                    <div style={{ position: 'relative', height: 'calc(100% - 30px)' }}>
+                        {children}
+                        <div className="resize-handle"></div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [tooltipState, setTooltipState] = useState({
+                position: { x: 100, y: 100 },
+                size: { width: 300, height: 200 },
+                isVisible: false,
+            });
+            const [logs, setLogs] = useState([]);
+
+            const addLog = useCallback((message) => {
+                setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${message}`, ...prev.slice(0, 9)]);
+            }, []);
+
+            const handleDrag = useCallback((newPosition) => {
+                addLog(`Dragged to: (${newPosition.x.toFixed(0)}, ${newPosition.y.toFixed(0)})`);
+                setTooltipState(prev => ({ ...prev, position: newPosition }));
+            }, [addLog]);
+
+            const handleResize = useCallback((newSize) => {
+                addLog(`Resized to: ${newSize.width.toFixed(0)}x${newSize.height.toFixed(0)}`);
+                setTooltipState(prev => ({ ...prev, size: newSize }));
+            }, [addLog]);
+
+            const handleClose = useCallback(() => {
+                addLog('Tooltip closed');
+                setTooltipState(prev => ({ ...prev, isVisible: false }));
+            }, [addLog]);
+
+            const toggleTooltip = useCallback(() => {
+                const newVisible = !tooltipState.isVisible;
+                addLog(newVisible ? 'Tooltip shown' : 'Tooltip hidden');
+                setTooltipState(prev => ({ ...prev, isVisible: newVisible }));
+            }, [tooltipState.isVisible, addLog]);
+
+            // Keyboard controls
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.ctrlKey) {
+                        switch (e.key) {
+                            case '/':
+                                e.preventDefault();
+                                if (!tooltipState.isVisible) {
+                                    toggleTooltip();
+                                }
+                                break;
+                            case '-':
+                                e.preventDefault();
+                                if (tooltipState.isVisible) {
+                                    toggleTooltip();
+                                }
+                                break;
+                            case 'ArrowUp':
+                                e.preventDefault();
+                                if (tooltipState.isVisible) {
+                                    const newY = Math.max(0, tooltipState.position.y - 10);
+                                    handleDrag({ ...tooltipState.position, y: newY });
+                                }
+                                break;
+                            case 'ArrowDown':
+                                e.preventDefault();
+                                if (tooltipState.isVisible) {
+                                    const newY = Math.min(window.innerHeight - tooltipState.size.height, tooltipState.position.y + 10);
+                                    handleDrag({ ...tooltipState.position, y: newY });
+                                }
+                                break;
+                            case 'ArrowLeft':
+                                e.preventDefault();
+                                if (tooltipState.isVisible) {
+                                    const newX = Math.max(0, tooltipState.position.x - 10);
+                                    handleDrag({ ...tooltipState.position, x: newX });
+                                }
+                                break;
+                            case 'ArrowRight':
+                                e.preventDefault();
+                                if (tooltipState.isVisible) {
+                                    const newX = Math.min(window.innerWidth - tooltipState.size.width, tooltipState.position.x + 10);
+                                    handleDrag({ ...tooltipState.position, x: newX });
+                                }
+                                break;
+                        }
+                    }
+                };
+
+                document.addEventListener('keydown', handleKeyDown);
+                return () => document.removeEventListener('keydown', handleKeyDown);
+            }, [tooltipState, toggleTooltip, handleDrag]);
+
+            return (
+                <div className="container">
+                    <h1>Draggable Tooltip Test</h1>
+                    <p className="text-lg mb-8 opacity-90">
+                        Test the draggable and resizable tooltip functionality with keyboard controls.
+                    </p>
+
+                    <div className="status">
+                        Current Tooltip State: <br />
+                        Position: ({tooltipState.position.x.toFixed(0)}, {tooltipState.position.y.toFixed(0)}) | 
+                        Size: ({tooltipState.size.width.toFixed(0)}x{tooltipState.size.height.toFixed(0)}) | 
+                        Visible: {tooltipState.isVisible ? 'Yes' : 'No'}
+                    </div>
+
+                    <div className="glass-card">
+                        <h2>Interactive Tooltip Demo</h2>
+                        <p className="mb-4 opacity-80">
+                            Click the button to toggle the draggable tooltip. Use the drag handle to move it,
+                            and corner handles to resize. Try keyboard shortcuts!
+                        </p>
+                        <button
+                            className="test-button"
+                            onClick={toggleTooltip}
+                        >
+                            {tooltipState.isVisible ? 'Hide Tooltip' : 'Show Tooltip'}
+                        </button>
+                    </div>
+
+                    <div className="instructions">
+                        <h3>Keyboard Controls:</h3>
+                        <div className="instruction-item">
+                            <span className="key">Ctrl + /</span>
+                            <span>Show tooltip</span>
+                        </div>
+                        <div className="instruction-item">
+                            <span className="key">Ctrl + -</span>
+                            <span>Hide tooltip</span>
+                        </div>
+                        <div className="instruction-item">
+                            <span className="key">Ctrl + Arrow Keys</span>
+                            <span>Move tooltip</span>
+                        </div>
+                        <div className="instruction-item">
+                            <span className="key">Mouse</span>
+                            <span>Drag handle to move, corner to resize</span>
+                        </div>
+                    </div>
+
+                    <div className="log-container">
+                        <h3>Action Log</h3>
+                        <div className="log-box">
+                            {logs.map((log, index) => (
+                                <div key={index} className="log-entry">{log}</div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {tooltipState.isVisible && (
+                    <DraggableTooltip
+                        id="test-tooltip"
+                        initialPosition={tooltipState.position}
+                        initialSize={tooltipState.size}
+                        onDrag={handleDrag}
+                        onResize={handleResize}
+                        onClose={handleClose}
+                        minWidth={200}
+                        minHeight={100}
+                        maxWidth={600}
+                        maxHeight={400}
+                    >
+                        <div className="p-6 text-white">
+                            <h4 className="text-xl font-bold mb-2">Draggable Tooltip!</h4>
+                            <p className="mb-2">This tooltip is fully interactive. You can:</p>
+                            <ul className="text-sm mb-4 space-y-1">
+                                <li>• Drag it by the handle at the top</li>
+                                <li>• Resize it by dragging the corner</li>
+                                <li>• Move it with Ctrl + Arrow Keys</li>
+                                <li>• Show/hide with Ctrl + / and Ctrl + -</li>
+                            </ul>
+                            <button 
+                                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                                onClick={handleClose}
+                            >
+                                Close Tooltip
+                            </button>
+                        </div>
+                    </DraggableTooltip>
+                )}
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

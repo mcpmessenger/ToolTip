@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolTip Library - React Interactive Test</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            margin: 0;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.3; }
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 40px;
+            margin: 30px 0;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .test-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        }
+        
+        .test-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 16px 32px;
+            margin: 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .test-button:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 8px 24px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .test-button:hover::before {
+            left: 100%;
+        }
+        
+        .test-button:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+        
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            margin: 24px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 16px 48px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+        
+        .glass-card h3 {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 16px;
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-card p {
+            position: relative;
+            z-index: 1;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .status {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
+            color: white;
+            padding: 16px 32px;
+            border-radius: 24px;
+            margin: 24px 0;
+            display: inline-block;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .status::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff, #f0f0f0, #e0e0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            border-radius: 2px;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, #f8f8f8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            max-height: 200px;
+            overflow: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+        
+        .state-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .instructions ol {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Tooltip Styles */
+        .interactive-tooltip {
+            position: fixed;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 200ms ease-in-out;
+            pointer-events: none;
+        }
+        
+        .interactive-tooltip.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .glass-interactive-tooltip {
+            background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            box-shadow: rgba(0,0,0,0.3) 30px 50px 25px -40px, rgba(0,0,0,0.1) 0px 25px 30px 0px;
+            transform: translate3d(0, 0, 0);
+            transform-style: preserve-3d;
+        }
+        
+        .tooltip-drag-handle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+        
+        .resize-handle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 2px;
+            z-index: 10;
+        }
+        
+        .resize-n { top: -4px; left: 50%; transform: translateX(-50%); width: 20px; height: 8px; cursor: n-resize; }
+        .resize-s { bottom: -4px; left: 50%; transform: translateX(-50%); width: 20px; height: 8px; cursor: s-resize; }
+        .resize-e { right: -4px; top: 50%; transform: translateY(-50%); width: 8px; height: 20px; cursor: e-resize; }
+        .resize-w { left: -4px; top: 50%; transform: translateY(-50%); width: 8px; height: 20px; cursor: w-resize; }
+        .resize-ne { top: -4px; right: -4px; width: 12px; height: 12px; cursor: ne-resize; }
+        .resize-nw { top: -4px; left: -4px; width: 12px; height: 12px; cursor: nw-resize; }
+        .resize-se { bottom: -4px; right: -4px; width: 12px; height: 12px; cursor: se-resize; }
+        .resize-sw { bottom: -4px; left: -4px; width: 12px; height: 12px; cursor: sw-resize; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useRef, useCallback, useEffect } = React;
+        
+        // Tooltip Provider Component
+        const TooltipProvider = ({ children, defaultConfig = {} }) => {
+            return React.createElement('div', { className: 'tooltip-provider' }, children);
+        };
+        
+        // Interactive Tooltip Component
+        const InteractiveTooltip = ({ 
+            content, 
+            children, 
+            trigger = 'hover',
+            placement = 'top',
+            theme = 'default',
+            draggable = true,
+            resizable = true,
+            keyboardControls = true,
+            minWidth = 200,
+            minHeight = 100,
+            maxWidth = 600,
+            maxHeight = 400,
+            onShow,
+            onHide,
+            onKeyboardAction
+        }) => {
+            const triggerRef = useRef(null);
+            const tooltipRef = useRef(null);
+            const [isVisible, setIsVisible] = useState(false);
+            const [position, setPosition] = useState({ x: 0, y: 0 });
+            const [size, setSize] = useState({ width: 300, height: 150 });
+            const [dragState, setDragState] = useState({ isDragging: false, startX: 0, startY: 0, initialX: 0, initialY: 0 });
+            const [resizeState, setResizeState] = useState({ isResizing: false, handle: '', startX: 0, startY: 0, initialWidth: 0, initialHeight: 0, initialX: 0, initialY: 0 });
+            
+            const showTooltip = useCallback(() => {
+                if (triggerRef.current && tooltipRef.current) {
+                    const triggerRect = triggerRef.current.getBoundingClientRect();
+                    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+                    
+                    let x, y;
+                    switch (placement) {
+                        case 'top':
+                            x = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+                            y = triggerRect.top - tooltipRect.height - 10;
+                            break;
+                        case 'bottom':
+                            x = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+                            y = triggerRect.bottom + 10;
+                            break;
+                        case 'left':
+                            x = triggerRect.left - tooltipRect.width - 10;
+                            y = triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
+                            break;
+                        case 'right':
+                            x = triggerRect.right + 10;
+                            y = triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
+                            break;
+                        default:
+                            x = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+                            y = triggerRect.bottom + 10;
+                    }
+                    
+                    x = Math.max(10, Math.min(window.innerWidth - size.width - 10, x));
+                    y = Math.max(10, Math.min(window.innerHeight - size.height - 10, y));
+                    
+                    setPosition({ x, y });
+                    setIsVisible(true);
+                    onShow?.();
+                    onKeyboardAction?.('show');
+                }
+            }, [placement, size, onShow, onKeyboardAction]);
+            
+            const hideTooltip = useCallback(() => {
+                setIsVisible(false);
+                onHide?.();
+                onKeyboardAction?.('hide');
+            }, [onHide, onKeyboardAction]);
+            
+            const toggleTooltip = useCallback(() => {
+                if (isVisible) {
+                    hideTooltip();
+                } else {
+                    showTooltip();
+                }
+            }, [isVisible, showTooltip, hideTooltip]);
+            
+            const handleDragStart = useCallback((e) => {
+                if (!draggable) return;
+                e.preventDefault();
+                setDragState({
+                    isDragging: true,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    initialX: position.x,
+                    initialY: position.y
+                });
+                onKeyboardAction?.('dragStart', { x: position.x, y: position.y });
+            }, [draggable, position, onKeyboardAction]);
+            
+            const handleDragMove = useCallback((e) => {
+                if (!dragState.isDragging) return;
+                const deltaX = e.clientX - dragState.startX;
+                const deltaY = e.clientY - dragState.startY;
+                const newX = Math.max(0, Math.min(window.innerWidth - size.width, dragState.initialX + deltaX));
+                const newY = Math.max(0, Math.min(window.innerHeight - size.height, dragState.initialY + deltaY));
+                setPosition({ x: newX, y: newY });
+            }, [dragState, size]);
+            
+            const handleDragEnd = useCallback(() => {
+                setDragState(prev => ({ ...prev, isDragging: false }));
+                onKeyboardAction?.('dragEnd', position);
+            }, [position, onKeyboardAction]);
+            
+            const handleResizeStart = useCallback((e, handle) => {
+                if (!resizable) return;
+                e.preventDefault();
+                e.stopPropagation();
+                setResizeState({
+                    isResizing: true,
+                    handle,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    initialWidth: size.width,
+                    initialHeight: size.height,
+                    initialX: position.x,
+                    initialY: position.y
+                });
+                onKeyboardAction?.('resizeStart', { handle, size, position });
+            }, [resizable, size, position, onKeyboardAction]);
+            
+            const handleResizeMove = useCallback((e) => {
+                if (!resizeState.isResizing) return;
+                const deltaX = e.clientX - resizeState.startX;
+                const deltaY = e.clientY - resizeState.startY;
+                let newWidth = resizeState.initialWidth;
+                let newHeight = resizeState.initialHeight;
+                let newX = resizeState.initialX;
+                let newY = resizeState.initialY;
+                
+                const handle = resizeState.handle;
+                if (handle.includes('e')) {
+                    newWidth = Math.max(minWidth, Math.min(maxWidth, resizeState.initialWidth + deltaX));
+                }
+                if (handle.includes('w')) {
+                    newWidth = Math.max(minWidth, Math.min(maxWidth, resizeState.initialWidth - deltaX));
+                    newX = Math.max(0, resizeState.initialX + deltaX);
+                }
+                if (handle.includes('s')) {
+                    newHeight = Math.max(minHeight, Math.min(maxHeight, resizeState.initialHeight + deltaY));
+                }
+                if (handle.includes('n')) {
+                    newHeight = Math.max(minHeight, Math.min(maxHeight, resizeState.initialHeight - deltaY));
+                    newY = Math.max(0, resizeState.initialY + deltaY);
+                }
+                
+                setSize({ width: newWidth, height: newHeight });
+                setPosition({ x: newX, y: newY });
+            }, [resizeState, minWidth, maxWidth, minHeight, maxHeight]);
+            
+            const handleResizeEnd = useCallback(() => {
+                setResizeState(prev => ({ ...prev, isResizing: false }));
+                onKeyboardAction?.('resizeEnd', { size, position });
+            }, [size, position, onKeyboardAction]);
+            
+            useEffect(() => {
+                if (dragState.isDragging) {
+                    document.addEventListener('mousemove', handleDragMove);
+                    document.addEventListener('mouseup', handleDragEnd);
+                    return () => {
+                        document.removeEventListener('mousemove', handleDragMove);
+                        document.removeEventListener('mouseup', handleDragEnd);
+                    };
+                }
+            }, [dragState.isDragging, handleDragMove, handleDragEnd]);
+            
+            useEffect(() => {
+                if (resizeState.isResizing) {
+                    document.addEventListener('mousemove', handleResizeMove);
+                    document.addEventListener('mouseup', handleResizeEnd);
+                    return () => {
+                        document.removeEventListener('mousemove', handleResizeMove);
+                        document.removeEventListener('mouseup', handleResizeEnd);
+                    };
+                }
+            }, [resizeState.isResizing, handleResizeMove, handleResizeEnd]);
+            
+            const getTooltipStyles = () => ({
+                position: 'fixed',
+                left: `${position.x}px`,
+                top: `${position.y}px`,
+                width: `${size.width}px`,
+                height: `${size.height}px`,
+                zIndex: 9999,
+                opacity: isVisible ? 1 : 0,
+                transition: 'opacity 200ms ease-in-out',
+                pointerEvents: isVisible ? 'auto' : 'none',
+                background: theme === 'glass' 
+                    ? 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%)'
+                    : 'rgba(0, 0, 0, 0.9)',
+                color: 'white',
+                borderRadius: theme === 'glass' ? '50px' : '8px',
+                padding: '20px',
+                boxShadow: theme === 'glass' 
+                    ? 'rgba(0,0,0,0.3) 30px 50px 25px -40px, rgba(0,0,0,0.1) 0px 25px 30px 0px'
+                    : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                border: theme === 'glass' 
+                    ? '1px solid rgba(255, 255, 255, 0.2)'
+                    : '1px solid rgba(255, 255, 255, 0.1)',
+                backdropFilter: theme === 'glass' ? 'blur(12px)' : 'none',
+                fontFamily: 'system-ui, sans-serif',
+                fontSize: '14px',
+                wordWrap: 'break-word',
+                transform: theme === 'glass' ? 'translate3d(0, 0, 0)' : 'none',
+                transformStyle: theme === 'glass' ? 'preserve-3d' : 'initial'
+            });
+            
+            return React.createElement(React.Fragment, null, [
+                React.cloneElement(children, { 
+                    ref: triggerRef, 
+                    onClick: trigger === 'click' ? toggleTooltip : undefined,
+                    onMouseEnter: trigger === 'hover' ? showTooltip : undefined,
+                    onMouseLeave: trigger === 'hover' ? hideTooltip : undefined
+                }),
+                isVisible && React.createElement('div', {
+                    key: 'tooltip',
+                    ref: tooltipRef,
+                    className: `interactive-tooltip ${theme === 'glass' ? 'glass-interactive-tooltip' : ''} visible`,
+                    style: getTooltipStyles()
+                }, [
+                    draggable && React.createElement('div', {
+                        key: 'drag-handle',
+                        className: 'tooltip-drag-handle',
+                        onMouseDown: handleDragStart,
+                        style: {
+                            borderRadius: theme === 'glass' ? '50px 50px 0 0' : '8px 8px 0 0'
+                        }
+                    }, [
+                        ...Array(3).fill().map((_, i) => React.createElement('div', {
+                            key: i,
+                            style: {
+                                width: '20px',
+                                height: '4px',
+                                background: 'rgba(255, 255, 255, 0.5)',
+                                borderRadius: '2px',
+                                margin: '0 4px'
+                            }
+                        }))
+                    ]),
+                    React.createElement('div', {
+                        key: 'content',
+                        className: 'tooltip-content',
+                        style: {
+                            paddingTop: draggable ? '40px' : '20px',
+                            height: '100%',
+                            overflow: 'auto'
+                        }
+                    }, content),
+                    resizable && ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'].map(handle => 
+                        React.createElement('div', {
+                            key: `resize-${handle}`,
+                            className: `resize-handle resize-${handle}`,
+                            onMouseDown: (e) => handleResizeStart(e, handle)
+                        })
+                    )
+                ])
+            ]);
+        };
+        
+        // Main App Component
+        const App = () => {
+            const [keyboardLog, setKeyboardLog] = useState([]);
+            const [tooltipState, setTooltipState] = useState({
+                position: { x: 0, y: 0 },
+                size: { width: 300, height: 150 },
+                isVisible: false,
+                activeTooltip: 'None'
+            });
+            
+            const logAction = useCallback((action, data = null) => {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${action}${data ? ` - ${JSON.stringify(data)}` : ''}`;
+                setKeyboardLog(prev => [...prev.slice(-9), logEntry]);
+            }, []);
+            
+            const clearLog = useCallback(() => {
+                setKeyboardLog([]);
+            }, []);
+            
+            const handleKeyboardAction = useCallback((action, data) => {
+                logAction(action, data);
+                if (data) {
+                    setTooltipState(prev => ({
+                        ...prev,
+                        ...(data.position && { position: data.position }),
+                        ...(data.size && { size: data.size }),
+                        ...(action === 'show' && { isVisible: true, activeTooltip: 'Active' }),
+                        ...(action === 'hide' && { isVisible: false, activeTooltip: 'None' })
+                    }));
+                }
+            }, [logAction]);
+            
+            return React.createElement(TooltipProvider, null,
+                React.createElement('div', { className: 'container' }, [
+                    React.createElement('h1', { key: 'title' }, '🎮 Interactive Tooltip Test'),
+                    React.createElement('div', { key: 'status', className: 'status' }, 
+                        '✅ Testing Draggable & Resizable Tooltip Features\n🎯 Click buttons to show tooltips, then drag and resize them!'
+                    ),
+                    React.createElement('div', { key: 'tooltips', className: 'test-section' }, [
+                        React.createElement('h2', { key: 'tooltips-title' }, '🎮 Interactive Tooltips'),
+                        React.createElement(InteractiveTooltip, {
+                            key: 'basic-tooltip',
+                            content: React.createElement('div', null, [
+                                React.createElement('h3', { key: 'title' }, '🎮 Interactive Tooltip'),
+                                React.createElement('p', { key: 'desc' }, 'This tooltip can be:'),
+                                React.createElement('ul', { key: 'features', style: { textAlign: 'left', margin: '10px 0' } }, [
+                                    React.createElement('li', { key: 'drag' }, '🖱️ Dragged by the top handle'),
+                                    React.createElement('li', { key: 'resize' }, '📏 Resized by the corner handles'),
+                                    React.createElement('li', { key: 'keyboard' }, '⌨️ Controlled with keyboard shortcuts')
+                                ]),
+                                React.createElement('p', { key: 'try' }, 'Try dragging it around and resizing it!')
+                            ]),
+                            placement: 'top',
+                            trigger: 'click',
+                            theme: 'default',
+                            draggable: true,
+                            resizable: true,
+                            minWidth: 250,
+                            minHeight: 200,
+                            maxWidth: 500,
+                            maxHeight: 400,
+                            onKeyboardAction: handleKeyboardAction
+                        }, React.createElement('button', { className: 'test-button' }, '🎮 Basic Interactive Tooltip')),
+                        React.createElement(InteractiveTooltip, {
+                            key: 'glass-tooltip',
+                            content: React.createElement('div', null, [
+                                React.createElement('h3', { key: 'title' }, '✨ Glass Tooltip'),
+                                React.createElement('p', { key: 'desc' }, 'This tooltip has glass morphism styling!'),
+                                React.createElement('div', { 
+                                    key: 'features', 
+                                    style: { background: 'rgba(255, 255, 255, 0.1)', padding: '10px', borderRadius: '8px', margin: '10px 0' } 
+                                }, [
+                                    React.createElement('strong', { key: 'label' }, 'Features:'),
+                                    React.createElement('ul', { key: 'list', style: { textAlign: 'left', margin: '5px 0' } }, [
+                                        React.createElement('li', { key: '3d' }, '3D hover effects'),
+                                        React.createElement('li', { key: 'blur' }, 'Backdrop blur'),
+                                        React.createElement('li', { key: 'layers' }, 'Glass layers')
+                                    ])
+                                ])
+                            ]),
+                            placement: 'right',
+                            trigger: 'hover',
+                            theme: 'glass',
+                            draggable: true,
+                            resizable: true,
+                            minWidth: 300,
+                            minHeight: 250,
+                            maxWidth: 600,
+                            maxHeight: 500,
+                            onKeyboardAction: handleKeyboardAction
+                        }, React.createElement('div', { className: 'glass-card' }, [
+                            React.createElement('h3', { key: 'title' }, '✨ Glass Card'),
+                            React.createElement('p', { key: 'desc' }, 'Hover me for a glass tooltip!')
+                        ]))
+                    ]),
+                    React.createElement('div', { key: 'keyboard', className: 'test-section' }, [
+                        React.createElement('h2', { key: 'keyboard-title' }, '⌨️ Keyboard Controls'),
+                        React.createElement('div', { key: 'instructions', className: 'instructions' }, [
+                            React.createElement('h3', { key: 'inst-title' }, 'Try these keyboard shortcuts:'),
+                            React.createElement('ul', { key: 'shortcuts' }, [
+                                React.createElement('li', { key: 'show' }, 'Ctrl + / - Show tooltip'),
+                                React.createElement('li', { key: 'hide' }, 'Ctrl + - - Hide tooltip'),
+                                React.createElement('li', { key: 'toggle' }, 'Ctrl + T - Toggle tooltip'),
+                                React.createElement('li', { key: 'escape' }, 'Escape - Hide tooltip'),
+                                React.createElement('li', { key: 'arrows' }, 'Ctrl + Arrow Keys - Move tooltip'),
+                                React.createElement('li', { key: 'resize' }, 'Ctrl + +/- - Resize tooltip')
+                            ])
+                        ])
+                    ]),
+                    React.createElement('div', { key: 'state', className: 'test-section' }, [
+                        React.createElement('h2', { key: 'state-title' }, '📊 Live State & Log'),
+                        React.createElement('div', { key: 'state-content', style: { display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' } }, [
+                            React.createElement('div', { key: 'log', style: { flex: 1, minWidth: '300px' } }, [
+                                React.createElement('h3', { key: 'log-title' }, '⌨️ Action Log'),
+                                React.createElement('button', { 
+                                    key: 'clear-btn', 
+                                    className: 'test-button', 
+                                    style: { marginBottom: '10px' },
+                                    onClick: clearLog
+                                }, 'Clear Log'),
+                                React.createElement('div', { key: 'log-container', className: 'log-container' }, 
+                                    keyboardLog.length === 0 
+                                        ? React.createElement('div', { style: { color: 'rgba(255, 255, 255, 0.5)' } }, 'No actions yet. Try clicking buttons or using keyboard shortcuts!')
+                                        : keyboardLog.map((log, index) => React.createElement('div', { key: index, style: { marginBottom: '5px' } }, log))
+                                )
+                            ]),
+                            React.createElement('div', { key: 'state-display', style: { flex: 1, minWidth: '300px' } }, [
+                                React.createElement('h3', { key: 'state-title' }, '📊 Tooltip State'),
+                                React.createElement('div', { key: 'state-info', className: 'state-display' }, [
+                                    React.createElement('div', { key: 'visible' }, `Visible: ${tooltipState.isVisible ? 'Yes' : 'No'}`),
+                                    React.createElement('div', { key: 'position' }, `Position: x: ${Math.round(tooltipState.position.x)}, y: ${Math.round(tooltipState.position.y)}`),
+                                    React.createElement('div', { key: 'size' }, `Size: ${Math.round(tooltipState.size.width)} × ${Math.round(tooltipState.size.height)}`),
+                                    React.createElement('div', { key: 'active' }, `Active Tooltip: ${tooltipState.activeTooltip}`)
+                                ])
+                            ])
+                        ])
+                    ]),
+                    React.createElement('div', { key: 'instructions', className: 'test-section' }, [
+                        React.createElement('h2', { key: 'inst-title' }, '🎯 Test Instructions'),
+                        React.createElement('div', { key: 'inst-content', className: 'instructions' }, [
+                            React.createElement('ol', { key: 'inst-list' }, [
+                                React.createElement('li', { key: 'click' }, 'Click the buttons above to show tooltips'),
+                                React.createElement('li', { key: 'drag' }, 'Drag tooltips by their top handle (three lines) to move them'),
+                                React.createElement('li', { key: 'resize' }, 'Resize by dragging the corner handles (small squares)'),
+                                React.createElement('li', { key: 'keyboard' }, 'Use keyboard shortcuts to control tooltips programmatically'),
+                                React.createElement('li', { key: 'log' }, 'Watch the log to see all actions in real-time'),
+                                React.createElement('li', { key: 'multiple' }, 'Try multiple tooltips to test positioning and z-index')
+                            ])
+                        ])
+                    ])
+                ])
+            );
+        };
+        
+        // Render the app
+        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+        
+        console.log('🎮 Interactive Tooltip Test Loaded with React Components!');
+        console.log('🎯 Click the buttons to show tooltips');
+        console.log('🖱️ Drag tooltips by their top handle');
+        console.log('📏 Resize tooltips by dragging corner handles');
+        console.log('⌨️ Use Ctrl + /, Ctrl + -, Ctrl + T, or Escape');
+    </script>
+</body>
+</html>
