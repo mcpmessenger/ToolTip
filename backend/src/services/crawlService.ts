@@ -189,6 +189,26 @@ export class CrawlService {
     }
   }
 
+  async crawlSpecificPage(url: string): Promise<CrawlResult[]> {
+    try {
+      await this.initializeBrowser();
+      if (!this.browser) throw new Error('Browser not initialized');
+
+      const result = await this.crawlPage(url);
+      
+      if (result) {
+        // Save crawl result to database
+        await this.saveCrawlResults([result], `Current page: ${url}`);
+        return [result];
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Crawl specific page error:', error);
+      throw error;
+    }
+  }
+
   async close(): Promise<void> {
     if (this.browser) {
       await this.browser.close();

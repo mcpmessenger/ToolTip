@@ -11,11 +11,15 @@ import {
   Send,
   Upload,
   FileText,
-  MessageSquare
+  MessageSquare,
+  RefreshCw,
+  Globe
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
+import { chatWithAI } from '../api/chat';
+import { crawlCurrentPage } from '../api/crawler';
 
 interface Message {
   id: string;
@@ -129,23 +133,77 @@ export const DraggableTooltipCompanion: React.FC<DraggableTooltipCompanionProps>
     setInput('');
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Call the real chat API
+      const response = await chatWithAI(userMessage.content);
+      
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: `I understand you said: "${userMessage.content}". This is a simulated response from the AI assistant. In a real implementation, this would connect to your AI service.`,
+        content: response.response,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: 'Sorry, I encountered an error. Please make sure the backend server is running.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const handleFreshCrawl = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Get current page URL
+      const currentUrl = window.location.href;
+      
+      // Add loading message
+      const loadingMessage: Message = {
+        id: Date.now().toString(),
+        type: 'ai',
+        content: `Crawling current page: ${currentUrl}...`,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, loadingMessage]);
+
+      // Call the crawl API
+      const crawlResult = await crawlCurrentPage(currentUrl);
+      
+      // Add result message
+      const resultMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: `Successfully crawled the current page! Found ${crawlResult.results?.length || 0} results. The page content has been analyzed and stored.`,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, resultMessage]);
+      
+    } catch (error) {
+      console.error('Crawl error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: 'Sorry, I encountered an error while crawling the current page. Please make sure the backend server is running.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -260,6 +318,16 @@ export const DraggableTooltipCompanion: React.FC<DraggableTooltipCompanionProps>
         {/* Action Buttons */}
         <div className="p-4 border-b border-slate-600/50">
           <div className="flex gap-2 flex-wrap">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="text-slate-300 border-slate-600 hover:bg-slate-700"
+              onClick={handleFreshCrawl}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Fresh Crawls
+            </Button>
             <Button size="sm" variant="outline" className="text-slate-300 border-slate-600 hover:bg-slate-700">
               <Search className="h-4 w-4 mr-2" />
               Search

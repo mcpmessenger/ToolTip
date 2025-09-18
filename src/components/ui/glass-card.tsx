@@ -99,7 +99,7 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
                     </button>
                   </div>
                   <div className="text-xs text-zinc-400 mt-1">
-                    AI-powered browsing with 3D effects
+                    Advanced scraping with Playwright
                   </div>
                 </div>
               </div>
@@ -160,7 +160,7 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
               >
                 <input 
                   type="text" 
-                  placeholder="Ask me anything or drag & drop a file..."
+                  placeholder="Fresh crawl - Enter URL or drag & drop a file..."
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -187,7 +187,7 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
               
               {/* Quick actions */}
               <div className="mt-2 flex gap-2 text-xs text-zinc-400">
-                <span>Press Enter to send</span>
+                <span>Press Enter to crawl</span>
                 <span>•</span>
                 <span>Drag files to upload</span>
               </div>

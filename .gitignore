@@ -121,6 +121,7 @@ dist
 
 # Vite
 dist/
+!dist/server.js
 dist-ssr/
 *.local
 

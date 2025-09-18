@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { chatRouter } from './routes/chat';
 import { crawlRouter } from './routes/crawl';
+import { gifCrawlRouter } from './routes/gifCrawl';
+import { pageScannerRouter } from './routes/pageScanner';
 
 // Load environment variables
 dotenv.config();
@@ -26,6 +28,8 @@ app.use(express.json());
 // Routes
 app.use('/api/chat', chatRouter);
 app.use('/api/crawl', crawlRouter);
+app.use('/api', gifCrawlRouter);
+app.use('/', pageScannerRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
