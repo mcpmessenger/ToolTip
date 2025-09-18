@@ -1,0 +1,39 @@
+service: tooltip-backend-simple
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: dev
+  deploymentBucket:
+    name: tooltip-backend-deployments-396608803476
+  environment:
+    NODE_ENV: production
+  logs:
+    restApi: false
+    frameworkLambda: false
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: "arn:aws:logs:*:*:*"
+
+functions:
+  api:
+    handler: dist/lambda.handler
+    timeout: 29
+    memorySize: 1024
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+      - http:
+          path: /
+          method: ANY
+          cors: true
+
+plugins:
+  - serverless-offline
