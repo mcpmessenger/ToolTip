@@ -5,6 +5,7 @@ import { chatRouter } from './routes/chat';
 import { crawlRouter } from './routes/crawl';
 import { gifCrawlRouter } from './routes/gifCrawl';
 import { pageScannerRouter } from './routes/pageScanner';
+import screenshotRouter from './routes/screenshot';
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +31,7 @@ app.use('/api/chat', chatRouter);
 app.use('/api/crawl', crawlRouter);
 app.use('/api', gifCrawlRouter);
 app.use('/', pageScannerRouter);
+app.use('/', screenshotRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

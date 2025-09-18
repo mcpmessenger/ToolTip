@@ -9,13 +9,21 @@ import { Settings, X, Play, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HoverGif } from '../components/HoverGif';
 import { SimplePageScanner } from '../components/SimplePageScanner';
+import { UniversalTooltipDemo } from '../components/UniversalTooltipDemo';
+import AutoTooltipInjector from '../components/AutoTooltipInjector';
+import SimpleTooltipInjector from '../components/SimpleTooltipInjector';
+import PreScrapedDemoPage from '../components/PreScrapedDemoPage';
 
 const Dashboard: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showGifDemo, setShowGifDemo] = useState(false);
   const [showSimpleDemo, setShowSimpleDemo] = useState(false);
   const [showPageScanner, setShowPageScanner] = useState(false);
+  const [showUniversalDemo, setShowUniversalDemo] = useState(false);
+  const [showPreScrapedDemo, setShowPreScrapedDemo] = useState(false);
   const [showCompanion, setShowCompanion] = useState(true); // Always open by default
+  
+  // Removed cache hook - using original HoverGif
   const [companionPosition, setCompanionPosition] = useState({ 
     x: typeof window !== 'undefined' ? 50 : 50, 
     y: typeof window !== 'undefined' ? window.innerHeight - 550 : 100 
@@ -128,6 +136,8 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen relative">
+        {/* Using original HoverGif components */}
+      
       <AuroraHero hideText={showSettings} onGetStarted={() => setShowCompanion(!showCompanion)} />
       
       {/* Settings and Demo Icons */}
@@ -138,8 +148,9 @@ const Dashboard: React.FC = () => {
         className="fixed top-6 right-6 z-50 flex space-x-2"
       >
         <HoverGif
-          targetUrl="https://github.com/mcpmessenger/ToolTip"
-          elementSelector=".repository-content"
+          targetUrl={window.location.href}
+          elementSelector="button[title='Simple GIF Demo']"
+          elementText="Simple GIF Demo"
           waitTime={2.0}
         >
           <button
@@ -152,8 +163,9 @@ const Dashboard: React.FC = () => {
         </HoverGif>
         
         <HoverGif
-          targetUrl="https://github.com/mcpmessenger/ToolTip"
-          elementSelector=".repository-content"
+          targetUrl={window.location.href}
+          elementSelector="button[title='Page Scanner Demo']"
+          elementText="Page Scanner Demo"
           waitTime={2.0}
         >
           <button
@@ -166,8 +178,39 @@ const Dashboard: React.FC = () => {
         </HoverGif>
         
         <HoverGif
-          targetUrl="https://github.com/mcpmessenger/ToolTip"
-          elementSelector=".repository-content"
+          targetUrl={window.location.href}
+          elementSelector="button[title='Universal Tooltip Demo']"
+          elementText="Universal Tooltip Demo"
+          waitTime={2.0}
+        >
+          <button
+            onClick={() => setShowUniversalDemo(!showUniversalDemo)}
+            className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+            title="Universal Tooltip Demo"
+          >
+            🎯
+          </button>
+        </HoverGif>
+        
+        <HoverGif
+          targetUrl={window.location.href}
+          elementSelector="button[title='Pre-Scraped Demo']"
+          elementText="Pre-Scraped Demo"
+          waitTime={2.0}
+        >
+          <button
+            onClick={() => setShowPreScrapedDemo(!showPreScrapedDemo)}
+            className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+            title="Pre-Scraped Demo"
+          >
+            ⚡
+          </button>
+        </HoverGif>
+        
+        <HoverGif
+          targetUrl={window.location.href}
+          elementSelector="button[title='GIF Crawl Demo']"
+          elementText="GIF Crawl Demo"
           waitTime={2.0}
         >
           <button
@@ -180,8 +223,9 @@ const Dashboard: React.FC = () => {
         </HoverGif>
         
         <HoverGif
-          targetUrl="https://github.com/mcpmessenger/ToolTip"
-          elementSelector=".repository-content"
+          targetUrl={window.location.href}
+          elementSelector="button[title='Settings']"
+          elementText="Settings"
           waitTime={2.0}
         >
           <button
@@ -217,8 +261,9 @@ const Dashboard: React.FC = () => {
               {/* Close Button */}
               <div className="absolute top-4 right-4 z-10">
                 <HoverGif
-                  targetUrl="https://github.com/mcpmessenger/ToolTip"
-                  elementSelector=".repository-content"
+                  targetUrl={window.location.href}
+                  elementSelector="button[aria-label='Close settings']"
+                  elementText="Close Settings"
                   waitTime={2.0}
                 >
                   <Button
@@ -226,6 +271,7 @@ const Dashboard: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="text-white/80 hover:text-white hover:bg-white/10"
+                    aria-label="Close settings"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -271,8 +317,9 @@ const Dashboard: React.FC = () => {
               {/* Close Button */}
               <div className="absolute top-4 right-4 z-10">
                 <HoverGif
-                  targetUrl="https://github.com/mcpmessenger/ToolTip"
-                  elementSelector=".repository-content"
+                  targetUrl={window.location.href}
+                  elementSelector="button[aria-label='Close demo']"
+                  elementText="Close Demo"
                   waitTime={2.0}
                 >
                   <Button
@@ -280,6 +327,7 @@ const Dashboard: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="text-white/80 hover:text-white hover:bg-white/10"
+                    aria-label="Close demo"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -316,8 +364,9 @@ const Dashboard: React.FC = () => {
               {/* Close Button */}
               <div className="absolute top-4 right-4 z-10">
                 <HoverGif
-                  targetUrl="https://github.com/mcpmessenger/ToolTip"
-                  elementSelector=".repository-content"
+                  targetUrl={window.location.href}
+                  elementSelector="button[aria-label='Close demo']"
+                  elementText="Close Demo"
                   waitTime={2.0}
                 >
                   <Button
@@ -325,6 +374,7 @@ const Dashboard: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="text-white/80 hover:text-white hover:bg-white/10"
+                    aria-label="Close demo"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -354,8 +404,9 @@ const Dashboard: React.FC = () => {
             {/* Close Button */}
             <div className="absolute top-4 right-4 z-10">
               <HoverGif
-                targetUrl="https://github.com/mcpmessenger/ToolTip"
-                elementSelector=".repository-content"
+                targetUrl={window.location.href}
+                elementSelector="button[aria-label='Close demo']"
+                elementText="Close Demo"
                 waitTime={2.0}
               >
                 <Button
@@ -363,6 +414,7 @@ const Dashboard: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   className="text-white/80 hover:text-white hover:bg-white/10"
+                  aria-label="Close demo"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -372,6 +424,84 @@ const Dashboard: React.FC = () => {
             {/* Page Scanner Content */}
             <div className="h-full overflow-y-auto">
               <SimplePageScanner />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Universal Tooltip Demo Panel */}
+      <AnimatePresence>
+        {showUniversalDemo && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="absolute inset-4 bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <div className="absolute top-4 right-4 z-10">
+              <HoverGif
+                targetUrl={window.location.href}
+                elementSelector="button[aria-label='Close demo']"
+                elementText="Close Demo"
+                waitTime={2.0}
+              >
+                <Button
+                  onClick={() => setShowUniversalDemo(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                  aria-label="Close demo"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </HoverGif>
+            </div>
+
+            {/* Universal Demo Content */}
+            <div className="h-full overflow-y-auto">
+              <UniversalTooltipDemo targetUrl={window.location.href} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Pre-Scraped Demo Panel */}
+      <AnimatePresence>
+        {showPreScrapedDemo && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="absolute inset-4 bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <div className="absolute top-4 right-4 z-10">
+              <HoverGif
+                targetUrl={window.location.href}
+                elementSelector="button[aria-label='Close demo']"
+                elementText="Close Demo"
+                waitTime={2.0}
+              >
+                <Button
+                  onClick={() => setShowPreScrapedDemo(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                  aria-label="Close demo"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </HoverGif>
+            </div>
+
+            {/* Pre-Scraped Demo Content */}
+            <div className="h-full overflow-y-auto">
+              <PreScrapedDemoPage />
             </div>
           </motion.div>
         )}

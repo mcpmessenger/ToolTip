@@ -1,25 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-interface HoverGifProps {
+interface SmartHoverGifProps {
   children: React.ReactNode;
-  targetUrl: string;
-  elementSelector?: string;
-  elementText?: string;
-  coordinates?: [number, number];
+  element?: HTMLElement;
   className?: string;
   waitTime?: number;
-  previewId?: string; // Pre-generated preview from page scanner
 }
 
-export const HoverGif: React.FC<HoverGifProps> = ({
+export const SmartHoverGif: React.FC<SmartHoverGifProps> = ({
   children,
-  targetUrl,
-  elementSelector,
-  elementText,
-  coordinates,
+  element,
   className = '',
-  waitTime = 2.0,
-  previewId
+  waitTime = 2.0
 }) => {
   const [gifUrl, setGifUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,26 +23,113 @@ export const HoverGif: React.FC<HoverGifProps> = ({
 
   const API_BASE_URL = 'http://localhost:3001';
 
+  // Detect what this element does
+  const detectElementAction = (element: HTMLElement) => {
+    const tagName = element.tagName.toLowerCase();
+    
+    // For links, use the href
+    if (tagName === 'a') {
+      const href = element.getAttribute('href');
+      if (href) {
+        try {
+          return new URL(href, window.location.href).href;
+        } catch {
+          return window.location.href;
+        }
+      }
+    }
+
+    // For buttons with data attributes
+    const dataUrl = element.getAttribute('data-url') || 
+                   element.getAttribute('data-href') ||
+                   element.getAttribute('data-target');
+    if (dataUrl) {
+      try {
+        return new URL(dataUrl, window.location.href).href;
+      } catch {
+        return window.location.href;
+      }
+    }
+
+    // For onclick handlers that navigate
+    const onclick = element.getAttribute('onclick');
+    if (onclick) {
+      const urlMatch = onclick.match(/window\.location\.href\s*=\s*['"]([^'"]+)['"]/);
+      if (urlMatch) {
+        try {
+          return new URL(urlMatch[1], window.location.href).href;
+        } catch {
+          return window.location.href;
+        }
+      }
+    }
+
+    // For form submissions
+    if (tagName === 'form') {
+      const action = element.getAttribute('action');
+      if (action) {
+        try {
+          return new URL(action, window.location.href).href;
+        } catch {
+          return window.location.href;
+        }
+      }
+    }
+
+    // Default to current page
+    return window.location.href;
+  };
+
+  // Generate smart selector for the element
+  const generateSmartSelector = (element: HTMLElement): string => {
+    if (element.id) {
+      return `#${element.id}`;
+    }
+
+    if (element.className) {
+      const classes = element.className.split(' ').filter(c => c.length > 0);
+      if (classes.length > 0) {
+        return `.${classes[0]}`;
+      }
+    }
+
+    // Fallback to tag name with position
+    let selector = element.tagName.toLowerCase();
+    const parent = element.parentElement;
+    if (parent) {
+      const siblings = Array.from(parent.children);
+      const index = siblings.indexOf(element);
+      if (index > 0) {
+        selector += `:nth-child(${index + 1})`;
+      }
+    }
+
+    return selector;
+  };
+
   const startCrawl = async () => {
-    if (isLoading || gifUrl) return;
+    if (isLoading || gifUrl || !element) return;
 
     setIsLoading(true);
     setError(null);
     
     try {
-      // If we have a previewId, use it directly
-      if (previewId) {
-        const gifResponse = await fetch(`${API_BASE_URL}/api/element-preview/${previewId}`);
-        if (gifResponse.ok) {
-          const blob = await gifResponse.blob();
-          const gifUrl = URL.createObjectURL(blob);
-          setGifUrl(gifUrl);
-          setIsLoading(false);
-          return;
-        }
-      }
+      const targetUrl = detectElementAction(element);
+      const elementSelector = generateSmartSelector(element);
+      const elementText = element.textContent?.trim() || '';
+      const rect = element.getBoundingClientRect();
+      const coordinates: [number, number] = [
+        Math.round(rect.left + rect.width / 2),
+        Math.round(rect.top + rect.height / 2)
+      ];
 
-      // Fallback to regular crawl
+      console.log('Starting crawl for element:', {
+        targetUrl,
+        elementSelector,
+        elementText,
+        coordinates
+      });
+
       const response = await fetch(`${API_BASE_URL}/api`, {
         method: 'POST',
         headers: {
@@ -195,7 +274,7 @@ export const HoverGif: React.FC<HoverGifProps> = ({
             </div>
           )}
           
-          {/* Success State - Clean Single View */}
+          {/* Success State - GIF Display */}
           {gifUrl && !isLoading && !error && (
             <div className="flex flex-col items-center space-y-2">
               <img 
@@ -207,10 +286,10 @@ export const HoverGif: React.FC<HoverGifProps> = ({
               />
               <div className="text-center">
                 <p className="text-xs text-gray-500 font-medium">
-                  Click preview ready
+                  Animated preview of clicking this element
                 </p>
                 <p className="text-xs text-gray-400">
-                  {targetUrl}
+                  {element ? detectElementAction(element) : 'Unknown target'}
                 </p>
                 <div className="flex items-center justify-center space-x-2 mt-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

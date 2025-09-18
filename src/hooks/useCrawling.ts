@@ -38,7 +38,7 @@ export const useCrawling = () => {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/crawl`, {
+      const response = await fetch(`${API_BASE_URL}/api`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
