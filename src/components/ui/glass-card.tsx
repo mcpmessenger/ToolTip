@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Instagram, Twitter, Github, ChevronDown, Send, Settings, Download, Upload, Search, Sparkles, BarChart3, HelpCircle } from "lucide-react";
-import spiderImage from "@/assets/spider.png";
+import { Instagram, Twitter, Github, ChevronDown, Send, Search } from "lucide-react";
+const spiderImage = "https://automationalien.s3.us-east-1.amazonaws.com/notextwhite.png";
 
 const ULogo = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -25,17 +25,13 @@ export interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   onSendMessage?: (message: string) => void;
   messages?: Message[];
   isLoading?: boolean;
-  onSettingsClick?: () => void;
   onFileUpload?: (file: File) => void;
   onSearchClick?: () => void;
-  onDashboardClick?: () => void;
-  onHelpClick?: () => void;
 }
 
 const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
-  ({ className, onSendMessage, messages = [], isLoading = false, onSettingsClick, onFileUpload, onSearchClick, onDashboardClick, onHelpClick, ...props }, ref) => {
+  ({ className, onSendMessage, messages = [], isLoading = false, onFileUpload, onSearchClick, ...props }, ref) => {
     const [inputValue, setInputValue] = React.useState('');
-    const [showActions, setShowActions] = React.useState(false);
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -80,84 +76,38 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
     return (
       <div
         ref={ref}
-        className={`group h-[500px] w-[400px] [perspective:1000px] ${className}`}
+        className={`group h-full w-full [perspective:1000px] ${className}`}
         {...props}
       >
         <div className="relative h-full rounded-[50px] bg-gradient-to-br from-zinc-900 to-black shadow-2xl transition-all duration-500 ease-in-out [transform-style:preserve-3d] group-hover:[box-shadow:rgba(0,0,0,0.3)_30px_50px_25px_-40px,rgba(0,0,0,0.1)_0px_25px_30px_0px] group-hover:[transform:rotate3d(1,1,0,30deg)]">
           <div className="absolute inset-2 rounded-[55px] border-b border-l border-white/20 bg-gradient-to-b from-white/30 to-white/10 backdrop-blur-sm [transform-style:preserve-3d] [transform:translate3d(0,0,25px)]"></div>
           <div className="absolute [transform:translate3d(0,0,26px)] h-full w-full flex flex-col">
             {/* Header */}
-            <div className="px-7 pt-6 pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="block text-xl font-black text-white">
-                    Tooltip Companion
-                  </span>
+            <div className="px-7 pt-6 pb-3 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="drag-handle cursor-move flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-black text-white">
+                      Tooltip Companion
+                    </span>
+                    <button
+                      onClick={onSearchClick}
+                      className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                      title="Search"
+                    >
+                      <Search className="h-4 w-4 text-white" />
+                    </button>
+                  </div>
                   <div className="text-xs text-zinc-400 mt-1">
                     AI-powered browsing with 3D effects
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={onSearchClick}
-                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                    title="Search"
-                  >
-                    <Search className="h-4 w-4 text-white" />
-                  </button>
-                  <button
-                    onClick={() => setShowActions(!showActions)}
-                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                    title="More actions"
-                  >
-                    <Sparkles className="h-4 w-4 text-white" />
-                  </button>
-                  <button
-                    onClick={onDashboardClick}
-                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                    title="Analytics Dashboard"
-                  >
-                    <BarChart3 className="h-4 w-4 text-white" />
-                  </button>
-                  <button
-                    onClick={onSettingsClick}
-                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                    title="Settings"
-                  >
-                    <Settings className="h-4 w-4 text-white" />
-                  </button>
-                  <button
-                    onClick={onHelpClick}
-                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                    title="Help & Shortcuts"
-                  >
-                    <HelpCircle className="h-4 w-4 text-white" />
-                  </button>
-                </div>
               </div>
               
-              {/* Action buttons */}
-              {showActions && (
-                <div className="mt-3 flex gap-2 animate-in slide-in-from-top-2 duration-200">
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-full text-xs text-white transition-colors"
-                  >
-                    <Upload className="h-3 w-3" />
-                    Upload
-                  </button>
-                  <button
-                    className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-full text-xs text-white transition-colors"
-                  >
-                    <Download className="h-3 w-3" />
-                    Export
-                  </button>
-                </div>
-              )}
             </div>
             
             {/* Chat Messages */}
-            <div className="flex-1 px-7 py-2 overflow-y-auto space-y-3">
+            <div className="flex-1 px-7 py-2 overflow-y-auto space-y-3 relative z-10">
               {messages.map((message, index) => (
                 <div
                   key={message.id}
@@ -202,9 +152,9 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
             </div>
             
             {/* Input Area */}
-            <div className="px-7 pb-6">
+            <div className="px-7 pb-6 relative z-10">
               <div 
-                className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20 hover:border-white/30 transition-colors"
+                className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20 hover:border-white/30 transition-colors relative z-20"
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
               >
@@ -214,12 +164,13 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="flex-1 bg-transparent text-white text-sm placeholder:text-zinc-300 border-none outline-none"
+                  className="flex-1 bg-transparent text-white text-sm placeholder:text-zinc-300 border-none outline-none relative z-30 text-left"
+                  style={{ textAlign: 'left' }}
                 />
                 <button 
                   onClick={handleSendMessage}
                   disabled={!inputValue.trim() || isLoading}
-                  className="p-1 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-1 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative z-30"
                 >
                   <Send className="h-4 w-4 text-white" />
                 </button>
@@ -262,10 +213,12 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
               ></div>
             ))}
             <div
-              className="absolute grid aspect-square w-[50px] place-content-center rounded-full bg-white shadow-[rgba(100,100,111,0.2)_-10px_10px_20px_0px] transition-all duration-500 ease-in-out [transform:translate3d(0,0,100px)] [transition-delay:1.6s] group-hover:[transform:translate3d(0,0,120px)]"
-              style={{ top: "30px", right: "30px" }}
+              className="absolute transition-all duration-500 ease-in-out [transform:translate3d(0,0,100px)] [transition-delay:1.6s] group-hover:[transform:translate3d(0,0,120px)]"
+              style={{ top: "20px", right: "20px" }}
             >
-              <img src={spiderImage} alt="Spider" className="w-8 h-8" />
+              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                <img src={spiderImage} alt="Spider" className="w-12 h-12" />
+              </div>
             </div>
           </div>
         </div>
