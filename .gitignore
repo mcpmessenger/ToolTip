@@ -178,3 +178,9 @@ playwright/.cache/
 # Temporary files
 *.tmp
 *.temp
+
+# Large media files (should be stored elsewhere or compressed)
+backend/gifs/
+backend/screenshots/
+*.gif
+*.png
