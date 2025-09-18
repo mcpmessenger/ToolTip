@@ -1,0 +1,39 @@
+{
+  "name": "@tooltip-library/vue",
+  "version": "0.1.0",
+  "description": "Vue.js integration for ToolTip Library",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
+  },
+  "keywords": [
+    "tooltip",
+    "vue",
+    "ui",
+    "glass-morphism",
+    "3d-effects"
+  ],
+  "author": "ToolTip Library Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": ">=3.0.0"
+  },
+  "dependencies": {
+    "@tooltip-library/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "rollup": "^4.6.1",
+    "typescript": "^5.2.2",
+    "vue": "^3.3.0"
+  }
+}
