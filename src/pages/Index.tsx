@@ -127,21 +127,25 @@ const Index = () => {
   };
 
   const handleSettingsClick = () => {
+    console.log("Settings button clicked!");
     setShowSettings(!showSettings);
     showInfo("Settings", "Opening settings panel");
   };
 
   const handleSearchClick = () => {
+    console.log("Search button clicked!");
     setShowSearch(!showSearch);
     showInfo("Search", "Opening advanced search");
   };
 
   const handleDashboardClick = () => {
+    console.log("Dashboard button clicked!");
     setShowDashboard(!showDashboard);
     showInfo("Dashboard", "Opening analytics dashboard");
   };
 
   const handleHelpClick = () => {
+    console.log("Help button clicked!");
     setShowHelp(!showHelp);
     showInfo("Help", "Opening help panel");
   };
@@ -235,8 +239,19 @@ const Index = () => {
           onRemove={removeNotification}
         />
         
-        {/* Social buttons below the glass card */}
-        <div className="flex justify-center gap-4 mt-6">
+        {/* Navigation and Social buttons below the glass card */}
+        <div className="flex flex-col items-center gap-4 mt-6">
+          {/* Dashboard Navigation */}
+          <a 
+            href="/dashboard" 
+            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg"
+          >
+            🚀 Open Tooltip Library Dashboard
+          </a>
+          <p className="text-slate-400 text-sm text-center max-w-md">
+            Manage API keys, configure settings, and monitor your tooltip library usage
+          </p>
+          
           <div className="flex gap-3">
             {[
               { icon: Instagram, delay: "400ms" },
