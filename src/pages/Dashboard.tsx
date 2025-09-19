@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import GlassCard, { Message } from '../components/ui/glass-card';
 import { AuroraHero } from '../components/ui/futurastic-hero-section';
 import { Button } from '../components/ui/button';
-import { Settings, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 // import { AutoInstantTooltip } from '../components/AutoInstantTooltip'; // DISABLED - causing conflicts
 // import { InstantTooltip } from '../components/InstantTooltip'; // DISABLED - causing conflicts
@@ -12,25 +12,22 @@ import { GlobalButtonWrapper } from '../components/GlobalButtonWrapper';
 // import { UniversalProactiveScraper } from '../components/UniversalProactiveScraper'; // DISABLED - using simpleAfterCapture instead
 
 const DashboardContent: React.FC = () => {
-  const [showSettings, setShowSettings] = useState(false);
   const [showCompanion, setShowCompanion] = useState(false); // Hidden by default, show on Get Started
-  const [useProactiveMode, setUseProactiveMode] = useState(false);
+  const [useProactiveMode, setUseProactiveMode] = useState(true); // Enable by default for Chrome extension
   
-  // Removed cache hook - using original HoverGif
+  // Simplified companion state
   const [companionPosition, setCompanionPosition] = useState({ 
     x: typeof window !== 'undefined' ? 50 : 50, 
-    y: typeof window !== 'undefined' ? window.innerHeight - 550 : 100 
+    y: typeof window !== 'undefined' ? window.innerHeight - 400 : 100 
   });
-  const [companionSize, setCompanionSize] = useState({ width: 400, height: 500 });
+  const [companionSize, setCompanionSize] = useState({ width: 350, height: 300 });
   const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       type: 'ai',
-      content: 'Welcome! I can help you perform fresh crawls and advanced web scraping with Playwright. Enter a URL to crawl or drag & drop files for analysis.',
+      content: 'Ready! Hover over buttons to see previews.',
       timestamp: new Date()
     }
   ]);
@@ -172,30 +169,15 @@ const DashboardContent: React.FC = () => {
     }, 1000);
   };
 
-  const handleFileUpload = (file: File) => {
-    console.log('File uploaded:', file.name);
-    // Handle file upload logic here
-  };
 
   const handleCompanionMouseDown = (e: React.MouseEvent) => {
-    if (e.target instanceof HTMLElement) {
-      if (e.target.closest('.drag-handle')) {
-        setIsDragging(true);
-        setDragStart({
-          x: e.clientX - companionPosition.x,
-          y: e.clientY - companionPosition.y
-        });
-        e.preventDefault();
-      } else if (e.target.closest('.resize-handle')) {
-        setIsResizing(true);
-        setResizeStart({
-          x: e.clientX,
-          y: e.clientY,
-          width: companionSize.width,
-          height: companionSize.height
-        });
-        e.preventDefault();
-      }
+    if (e.target instanceof HTMLElement && e.target.closest('.drag-handle')) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - companionPosition.x,
+        y: e.clientY - companionPosition.y
+      });
+      e.preventDefault();
     }
   };
 
@@ -204,20 +186,15 @@ const DashboardContent: React.FC = () => {
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
       setCompanionPosition({ x: newX, y: newY });
-    } else if (isResizing) {
-      const newWidth = Math.max(300, Math.min(800, resizeStart.width + (e.clientX - resizeStart.x)));
-      const newHeight = Math.max(400, Math.min(900, resizeStart.height + (e.clientY - resizeStart.y)));
-      setCompanionSize({ width: newWidth, height: newHeight });
     }
-  }, [isDragging, isResizing, dragStart, resizeStart]);
+  }, [isDragging, dragStart]);
 
   const handleCompanionMouseUp = useCallback(() => {
     setIsDragging(false);
-    setIsResizing(false);
   }, []);
 
   useEffect(() => {
-    if (isDragging || isResizing) {
+    if (isDragging) {
       document.addEventListener('mousemove', handleCompanionMouseMove);
       document.addEventListener('mouseup', handleCompanionMouseUp);
       return () => {
@@ -225,7 +202,7 @@ const DashboardContent: React.FC = () => {
         document.removeEventListener('mouseup', handleCompanionMouseUp);
       };
     }
-  }, [isDragging, isResizing, handleCompanionMouseMove, handleCompanionMouseUp]);
+  }, [isDragging, handleCompanionMouseMove, handleCompanionMouseUp]);
 
   // Update position on window resize
   useEffect(() => {
@@ -269,7 +246,7 @@ const DashboardContent: React.FC = () => {
         /> */}
       
       <AuroraHero 
-        hideText={showSettings} 
+        hideText={false} 
         onGetStarted={() => setShowCompanion(!showCompanion)} 
         useProactiveMode={useProactiveMode}
       />
@@ -299,80 +276,10 @@ const DashboardContent: React.FC = () => {
         </button>
         </SimplePreviewTooltip>
         
-        <SimplePreviewTooltip
-            targetUrl={window.location.href}
-          elementId="settings-button"
-          >
-            <button
-              id="settings-button"
-              onClick={() => setShowSettings(!showSettings)}
-              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
-              title="Settings"
-            >
-              <Settings className="h-6 w-6 text-white" />
-            </button>
-        </SimplePreviewTooltip>
         
       </motion.div>
 
 
-      {/* Settings Panel Overlay */}
-      <AnimatePresence>
-        {showSettings && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40"
-            onClick={() => setShowSettings(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 50, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 50, scale: 0.95 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute inset-4 bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button */}
-              <div className="absolute top-4 right-4 z-10">
-                  <Button
-                    onClick={() => setShowSettings(false)}
-                    variant="ghost"
-                    size="sm"
-                    className="text-white/80 hover:text-white hover:bg-white/10"
-                    aria-label="Close settings"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-              </div>
-
-              {/* Settings Content */}
-              <div className="h-full overflow-y-auto p-6">
-                <h2 className="text-2xl font-bold text-white mb-6">Settings</h2>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white">Proactive Mode</span>
-                    <button
-                      onClick={() => setUseProactiveMode(!useProactiveMode)}
-                      className={`w-12 h-6 rounded-full transition-colors ${
-                        useProactiveMode ? 'bg-green-500' : 'bg-gray-500'
-                      }`}
-                    >
-                      <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                        useProactiveMode ? 'translate-x-6' : 'translate-x-0.5'
-                      }`} />
-                    </button>
-              </div>
-                  <p className="text-gray-300 text-sm">
-                    When enabled, automatically detects and wraps clickable elements with instant tooltips.
-                  </p>
-              </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
 
       {/* Beautiful Draggable Glass Card Companion */}
@@ -396,15 +303,9 @@ const DashboardContent: React.FC = () => {
                 onSendMessage={handleSendMessage}
                 messages={messages}
                 isLoading={isLoading}
-                onFileUpload={handleFileUpload}
-                onSearchClick={() => console.log('Search clicked')}
                 onClose={() => setShowCompanion(false)}
                 className="w-full h-full"
               />
-              {/* Resize handle */}
-              <div className="resize-handle absolute bottom-0 right-0 w-4 h-4 bg-blue-500/50 hover:bg-blue-500/70 cursor-se-resize rounded-tl-lg flex items-center justify-center">
-                <div className="w-2 h-2 bg-white/70 rounded-full"></div>
-              </div>
             </div>
           </motion.div>
     </div>

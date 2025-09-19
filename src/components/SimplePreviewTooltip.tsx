@@ -90,13 +90,13 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
           const cacheKey = `preview_${window.location.href}_${elementId}`;
           localStorage.setItem(cacheKey, JSON.stringify(newPreviewData));
         } else {
-          setError('No preview available for this element.');
+          setError('No preview available');
         }
       } catch (e) {
-        setError('Failed to parse preview data.');
+        setError('Parse error');
       }
     } else {
-      setError('Proactive scraping results not found.');
+      setError('No data');
     }
 
     setIsLoading(false);
@@ -198,41 +198,27 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
             left: '50%', 
             transform: 'translateX(-50%)',
             marginTop: '8px',
-            width: '500px',
-            height: '350px',
+            width: '600px',
+            height: '400px',
             maxWidth: '90vw',
-            maxHeight: '50vh'
+            maxHeight: '60vh'
           }}
         >
           {/* Loading State */}
           {isLoading && (
-            <div className="h-full flex flex-col items-center justify-center bg-gray-50">
+            <div className="h-full flex items-center justify-center bg-gray-50">
               <div className="relative">
-                {/* Hourglass Icon */}
-                <svg className="w-16 h-16 text-blue-500 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l-4 4h8l-4-4zm0 20l4-4H8l4 4zm-4-6h8v2H8v-2zm0-2h8v2H8v-2z"/>
-                </svg>
-                {/* Animated sand particles */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce absolute" style={{animationDelay: '0ms', top: '20%', left: '45%'}}></div>
-                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce absolute" style={{animationDelay: '200ms', top: '30%', left: '50%'}}></div>
-                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce absolute" style={{animationDelay: '400ms', top: '40%', left: '47%'}}></div>
-                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce absolute" style={{animationDelay: '600ms', top: '50%', left: '52%'}}></div>
-                </div>
+                {/* Simple loading spinner */}
+                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
-              <div className="mt-4 text-sm text-gray-600 font-medium">Scraping in progress...</div>
-              <div className="mt-2 text-xs text-gray-500">Capturing external page</div>
             </div>
           )}
           
           {/* Error State */}
           {error && (
-            <div className="h-full flex flex-col items-center justify-center bg-red-50">
-              <div className="text-red-500 text-center">
-                <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                <p className="text-sm font-medium">{error}</p>
+            <div className="h-full flex items-center justify-center bg-gray-100">
+              <div className="w-16 h-16 border-4 border-gray-300 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gray-400 rounded-full"></div>
               </div>
             </div>
           )}
@@ -257,44 +243,33 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
                   </div>
                 </div>
       ) : previewData.type === 'after-screenshot' ? (
-        // Show after screenshot
+        // Show after screenshot - PURELY VISUAL
         <div className="h-full relative">
           {previewData.afterScreenshot ? (
-            <div className="h-full flex flex-col">
-              <div className="text-xs text-gray-500 mb-2 text-center px-4">
-                {previewData.description}
-                {previewData.isExternalNavigation && (
-                  <div className="mt-1 text-blue-600 font-medium">
-                    🌍 External Page
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 p-2">
-                <img 
-                  src={previewData.afterScreenshot}
-                  alt={previewData.isExternalNavigation ? "External page screenshot" : "Result after clicking"}
-                  className="w-full h-full object-contain rounded border shadow-lg"
-                  style={{ 
-                    imageRendering: 'auto',
-                    objectFit: 'contain'
-                  }}
-                />
-              </div>
-              {previewData.isExternalNavigation && previewData.externalUrl && (
-                <div className="text-xs text-blue-600 text-center px-2 pb-2 truncate">
-                  {previewData.externalUrl}
-                </div>
-              )}
+            <div className="h-full">
+              <img 
+                src={previewData.afterScreenshot}
+                alt="Preview"
+                className="w-full h-full object-contain rounded"
+                style={{ 
+                  imageRendering: 'auto',
+                  objectFit: 'contain'
+                }}
+              />
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-500">
-              No after screenshot available
+            <div className="h-full flex items-center justify-center bg-gray-100">
+              <div className="w-16 h-16 border-4 border-gray-300 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gray-400 rounded-full"></div>
+              </div>
             </div>
           )}
         </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-gray-500">
-                  Unknown preview type
+                <div className="h-full flex items-center justify-center bg-gray-100">
+                  <div className="w-16 h-16 border-4 border-gray-300 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-gray-400 rounded-full"></div>
+                  </div>
                 </div>
               )}
             </div>

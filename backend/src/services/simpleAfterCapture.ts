@@ -206,7 +206,7 @@ export class SimpleAfterCapture {
         console.log('✅ New page created after reinitialization');
       }
       
-      // Set viewport for high-resolution full screen capture
+      // Set viewport for high-resolution capture
       await page.setViewportSize({ width: 1920, height: 1080 });
       
       // Set device scale factor for higher resolution screenshots
@@ -743,18 +743,34 @@ export class SimpleAfterCapture {
         }
       }
 
-      // Take high-quality full screen after screenshot
-      console.log(`📸 Taking high-quality screenshot for: ${elementId}`);
+      // Determine if this was external navigation first
+      const isExternalNavigation = currentUrl !== url && new URL(url).hostname !== new URL(currentUrl).hostname;
+
+      // Take optimized screenshot based on link type
+      console.log(`📸 Taking ${isExternalNavigation ? 'focused' : 'full page'} screenshot for: ${elementId}`);
       let afterScreenshot: Buffer;
       try {
-        afterScreenshot = await page.screenshot({ 
-          type: 'png',
-          fullPage: true,
-          timeout: 5000,
-          animations: 'disabled' // Disable animations for cleaner screenshots
-        });
+        if (isExternalNavigation) {
+          // For external links, scroll to top and capture viewport for better readability
+          await page.evaluate(() => window.scrollTo(0, 0));
+          await page.waitForTimeout(1000); // Wait for scroll to complete
+          afterScreenshot = await page.screenshot({ 
+            type: 'png',
+            fullPage: false, // Viewport only for external links
+            timeout: 5000,
+            animations: 'disabled'
+          });
+        } else {
+          // For internal links, use full page
+          afterScreenshot = await page.screenshot({ 
+            type: 'png',
+            fullPage: true,
+            timeout: 5000,
+            animations: 'disabled'
+          });
+        }
       } catch (screenshotError) {
-        console.log(`⚠️ Full page screenshot failed for ${elementId}, trying viewport...`);
+        console.log(`⚠️ Screenshot failed for ${elementId}, trying fallback...`);
         afterScreenshot = await page.screenshot({ 
           type: 'png',
           timeout: 3000,
@@ -763,10 +779,7 @@ export class SimpleAfterCapture {
       }
 
       // Create compressed base64 image for Local Storage (NO FILE SAVING)
-      const afterScreenshotBase64 = await this.createAfterImage(afterScreenshot);
-
-      // Determine if this was external navigation
-      const isExternalNavigation = currentUrl !== url && new URL(url).hostname !== new URL(currentUrl).hostname;
+      const afterScreenshotBase64 = await this.createAfterImage(afterScreenshot, isExternalNavigation);
 
       console.log(`✅ Successfully captured: ${elementId}${isExternalNavigation ? ' (external page)' : ''}`);
       if (isExternalNavigation) {
@@ -829,24 +842,47 @@ export class SimpleAfterCapture {
     }
   }
 
-  private async createAfterImage(screenshot: Buffer): Promise<string> {
+  private async createAfterImage(screenshot: Buffer, isExternalLink: boolean = false): Promise<string> {
     try {
-      // Create a high-quality compressed base64 image for Local Storage ONLY (NO FILE SAVING)
-      console.log(`🖼️ Creating high-quality base64 image for Local Storage...`);
-      const compressed = await sharp(screenshot)
-        .resize(1000, 750, { 
-          fit: 'inside',
-          withoutEnlargement: true
-        })
-        .jpeg({ 
-          quality: 90, // Good quality without being too large
-          progressive: true
-        })
-        .toBuffer();
-      
-      const base64Data = `data:image/jpeg;base64,${compressed.toString('base64')}`;
-      console.log(`✅ Created high-quality base64 image (${base64Data.length} characters)`);
-      return base64Data;
+      // Create optimized base64 image based on link type
+      if (isExternalLink) {
+        console.log(`🖼️ Creating high-quality external link image for Local Storage...`);
+        // External links need higher quality for readability
+        const compressed = await sharp(screenshot)
+          .resize(1200, 900, { 
+            fit: 'inside',
+            withoutEnlargement: true,
+            kernel: sharp.kernel.lanczos3 // Better resampling for text
+          })
+          .png({ 
+            quality: 95, // Higher quality for external content
+            compressionLevel: 6, // Good balance of quality vs size
+            progressive: true
+          })
+          .toBuffer();
+        
+        const base64Data = `data:image/png;base64,${compressed.toString('base64')}`;
+        console.log(`✅ Created high-quality external link image (${base64Data.length} characters)`);
+        return base64Data;
+      } else {
+        console.log(`🖼️ Creating optimized internal button image for Local Storage...`);
+        // Internal buttons can use more compression
+        const compressed = await sharp(screenshot)
+          .resize(1000, 750, { 
+            fit: 'inside',
+            withoutEnlargement: true
+          })
+          .jpeg({ 
+            quality: 85, // Good quality for UI elements
+            progressive: true,
+            mozjpeg: true // Better compression
+          })
+          .toBuffer();
+        
+        const base64Data = `data:image/jpeg;base64,${compressed.toString('base64')}`;
+        console.log(`✅ Created optimized internal button image (${base64Data.length} characters)`);
+        return base64Data;
+      }
     } catch (error) {
       console.error('Error creating after image:', error);
       const fallbackBase64 = `data:image/png;base64,${screenshot.toString('base64')}`;

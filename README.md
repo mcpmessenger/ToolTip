@@ -1,10 +1,36 @@
 # ToolTip Companion v1.0
 
-Beautiful Interactive Tooltips for React with Proactive Screenshot Capture
+Beautiful Interactive Tooltips with Proactive Screenshot Capture
 
 ## 🎯 Overview
 
-ToolTip Companion is a React component library that provides intelligent tooltips with **proactive screenshot capture**. When you hover over any clickable element, you see a preview of what happens when you click it - captured automatically by Playwright.
+ToolTip Companion provides intelligent tooltips with **proactive screenshot capture**. When you hover over any clickable element, you see a preview of what happens when you click it - captured automatically by Playwright. Currently available as a React web application with Chrome extension development in progress.
+
+## 🚀 Current Status
+
+- ✅ **React Web App** - Fully functional with glassmorphism UI
+- ✅ **Playwright Backend** - Robust web scraping and screenshot capture
+- ✅ **External Link Support** - Captures where external links lead
+- 🔄 **Chrome Extension** - In development for universal website compatibility
+
+## 🌟 Chrome Extension Roadmap
+
+### Planned Features
+- **Universal Compatibility** - Works on any website you visit
+- **Native Performance** - Uses Chrome's built-in APIs for optimal speed
+- **Persistent Settings** - Your preferences saved across browser sessions
+- **Easy Toggle** - Enable/disable per site or globally
+- **Privacy Focused** - All processing happens locally or through your own backend
+
+### Technical Architecture
+```
+Chrome Extension
+├── manifest.json (v3)           # Extension configuration
+├── popup.html                   # Settings and controls UI
+├── content-script.js            # Page interaction and element detection
+├── background.js                # Service worker for API communication
+└── assets/                      # Icons and styling
+```
 
 ## 🔄 System Flow
 
