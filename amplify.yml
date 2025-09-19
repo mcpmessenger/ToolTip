@@ -3,26 +3,15 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "Installing dependencies..."
-        - npm ci
+        - echo "🚀 Starting ToolTip Companion v1.1 build..."
+        - chmod +x build-amplify-fixed.sh
     build:
       commands:
-        - echo "Installing backend dependencies..."
-        - cd backend && npm ci && cd ..
-        - echo "Building frontend..."
-        - npm run build
-        - echo "Building backend..."
-        - cd backend && npm run build && cd ..
-        - echo "Creating deployment structure..."
-        - mkdir -p dist/backend
-        - cp -r backend/dist/* dist/backend/
-        - cp backend/package.json dist/backend/
-        - cp -r backend/node_modules dist/backend/ 2>/dev/null || echo "Backend node_modules not found"
-        - echo "Creating server.js..."
-        - cp dist/server.js dist/server.js 2>/dev/null || echo "Using existing server.js"
+        - ./build-amplify-fixed.sh
     postBuild:
       commands:
-        - echo "Build completed successfully"
+        - echo "✅ Build completed successfully!"
+        - echo "📊 Build artifacts ready for deployment"
   artifacts:
     baseDirectory: dist
     files:
