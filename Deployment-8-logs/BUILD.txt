@@ -1,0 +1,29 @@
+2025-09-19T03:07:04.126Z [INFO]: # Build environment configured with Standard build compute type: 8GiB Memory, 4vCPUs, 128GB Disk Space
+2025-09-19T03:07:04.519Z [INFO]: # Cloning repository: git@github.com:mcpmessenger/ToolTip.git
+2025-09-19T03:07:05.309Z [INFO]: 
+2025-09-19T03:07:05.310Z [INFO]: Cloning into 'ToolTip'...
+2025-09-19T03:07:05.310Z [INFO]: # Switching to commit: b7eb5408ee306bb234e69f087c1f8cf15393e3ca
+2025-09-19T03:07:05.335Z [INFO]: Note: switching to 'b7eb5408ee306bb234e69f087c1f8cf15393e3ca'.
+                                 You are in 'detached HEAD' state. You can look around, make experimental
+                                 changes and commit them, and you can discard any commits you make in this
+                                 state without impacting any branches by switching back to a branch.
+                                 If you want to create a new branch to retain commits you create, you may
+                                 do so (now or later) by using -c with the switch command. Example:
+                                 git switch -c <new-branch-name>
+                                 Or undo this operation with:
+                                 git switch -
+                                 Turn off this advice by setting config variable advice.detachedHead to false
+                                 HEAD is now at b7eb540  Fix AWS Amplify Build - Remove Canvas Dependencies
+2025-09-19T03:07:05.404Z [INFO]: Successfully cleaned up Git credentials
+2025-09-19T03:07:05.405Z [INFO]: # Checking for Git submodules at: /codebuild/output/src1024915390/src/ToolTip/.gitmodules
+2025-09-19T03:07:05.412Z [ERROR]: !!! CustomerError: Unable to parse build spec: bad indentation of a sequence entry (37:11)
+                                  34 |         - app.use('/api', require('./back ...
+                                  35 |         - app.get('*', (req, res) => {
+                                  36 |         -   res.sendFile(path.join(__dirn ...
+                                  37 |         - });
+                                  ----------------^
+                                  38 |         - app.listen(PORT, () => {
+                                  39 |         -   console.log(`🚀 Server runnin ...
+2025-09-19T03:07:05.412Z [INFO]: # Starting environment caching...
+2025-09-19T03:07:05.413Z [INFO]: # Environment caching completed
+
