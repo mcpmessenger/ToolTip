@@ -68,70 +68,38 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
     setIsLoading(true);
     setError(null);
 
-    try {
-      const currentUrl = window.location.href;
-      const cacheKey = `preview_${currentUrl}_${elementId}`;
-      
-      // Clean up old cache entries to prevent localStorage overflow
-      cleanupOldCache();
-      
-      // Check if we have cached data first (priority: Local Storage)
-      const cachedData = localStorage.getItem(cacheKey);
-      if (cachedData) {
-        try {
-          const parsed = JSON.parse(cachedData);
-          console.log(`✅ Found cached data for ${elementId}:`, parsed);
-          setPreviewData(parsed);
-          setIsLoading(false);
-          return;
-        } catch (e) {
-          console.log(`❌ Invalid cached data for ${elementId}, removing...`);
-          localStorage.removeItem(cacheKey);
+    const proactiveResults = localStorage.getItem('proactive_scrape_results');
+    if (proactiveResults) {
+      try {
+        const results = JSON.parse(proactiveResults);
+        const elementResult = results.find((r: any) => r.elementId === elementId);
+        if (elementResult && elementResult.success) {
+          console.log(`✅ Found proactive scrape result for ${elementId}:`, elementResult);
+          const newPreviewData = {
+            type: 'after-screenshot',
+            title: elementResult.title,
+            description: elementResult.isExternalNavigation
+              ? `External page: ${elementResult.externalUrl}`
+              : `Result after clicking ${elementResult.title}`,
+            afterScreenshot: elementResult.afterScreenshot,
+            isExternalNavigation: elementResult.isExternalNavigation,
+            externalUrl: elementResult.externalUrl,
+            timestamp: elementResult.timestamp
+          };
+          setPreviewData(newPreviewData);
+          const cacheKey = `preview_${window.location.href}_${elementId}`;
+          localStorage.setItem(cacheKey, JSON.stringify(newPreviewData));
+        } else {
+          setError('No preview available for this element.');
         }
+      } catch (e) {
+        setError('Failed to parse preview data.');
       }
-      
-      console.log(`❌ No cached data found for ${elementId}, checking for proactive scrape results...`);
-      
-      // Check if we have proactive scrape results stored globally
-      const proactiveResults = localStorage.getItem('proactive_scrape_results');
-      if (proactiveResults) {
-        try {
-          const results = JSON.parse(proactiveResults);
-          const elementResult = results.find((r: any) => r.elementId === elementId);
-          if (elementResult && elementResult.success) {
-            console.log(`✅ Found proactive scrape result for ${elementId}:`, elementResult);
-            const previewData = {
-              type: 'after-screenshot',
-              title: elementResult.title,
-              description: elementResult.isExternalNavigation 
-                ? `External page: ${elementResult.externalUrl}` 
-                : `Result after clicking ${elementResult.title}`,
-              afterScreenshot: elementResult.afterScreenshot,
-              isExternalNavigation: elementResult.isExternalNavigation,
-              externalUrl: elementResult.externalUrl,
-              timestamp: elementResult.timestamp
-            };
-            setPreviewData(previewData);
-            localStorage.setItem(cacheKey, JSON.stringify(previewData));
-            setIsLoading(false);
-            return;
-          }
-        } catch (e) {
-          console.log(`❌ Invalid proactive scrape results, removing...`);
-          localStorage.removeItem('proactive_scrape_results');
-        }
-      }
-
-      // No cached data found - show error
-      console.log(`❌ No cached data available for element: ${elementId}`);
-      setError('No preview available - please wait for proactive scraping to complete');
-      
-    } catch (error) {
-      console.error('Error generating preview:', error);
-      setError('Preview unavailable');
-    } finally {
-      setIsLoading(false);
+    } else {
+      setError('Proactive scraping results not found.');
     }
+
+    setIsLoading(false);
   };
 
   const handleMouseEnter = () => {
@@ -158,21 +126,14 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
         console.log(`❌ Invalid cached data for ${elementId}, removing...`);
         localStorage.removeItem(cacheKey);
       }
-    } else {
-      console.log(`❌ No cached data found for key: ${cacheKey}`);
     }
     
     // Check global proactive scrape results
     const proactiveResults = localStorage.getItem('proactive_scrape_results');
-    console.log(`🔍 Checking global proactive results:`, proactiveResults ? 'Found' : 'Not found');
-    
     if (proactiveResults) {
       try {
         const results = JSON.parse(proactiveResults);
-        console.log(`📊 Global results count: ${results.length}`);
         const elementResult = results.find((r: any) => r.elementId === elementId);
-        console.log(`🎯 Looking for elementId: ${elementId}, found:`, elementResult ? 'Yes' : 'No');
-        
         if (elementResult && elementResult.success) {
           console.log(`✅ Found proactive scrape result for ${elementId}:`, elementResult);
           const previewData = {

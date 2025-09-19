@@ -99,7 +99,7 @@ export const AuroraHero = ({ hideText = false, onGetStarted, useProactiveMode = 
           </SimplePreviewTooltip>
             
             <SimplePreviewTooltip
-              targetUrl="https://github.com/mcpmessenger/ToolTip"
+              targetUrl={window.location.href}
               elementId="view-documentation-button"
             >
               <motion.a

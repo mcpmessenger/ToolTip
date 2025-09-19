@@ -79,7 +79,7 @@ const DashboardContent: React.FC = () => {
         const response = await fetch('http://127.0.0.1:3001/api/after-capture/capture', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: window.location.origin })
+          body: JSON.stringify({ url: window.location.href })
         });
         
         if (response.ok) {
@@ -117,7 +117,7 @@ const DashboardContent: React.FC = () => {
             setMessages(prev => [...prev, {
               id: Date.now().toString(),
               type: 'ai',
-              content: `🎉 Proactive scraping completed! Found ${data.data.results.length} clickable elements with screenshots. Hover over buttons to see previews!`,
+              content: `🎉 Proactive scraping completed! Found ${data.data.results.length} clickable elements with screenshots (processing up to 20 elements for better external link coverage). Hover over buttons and links to see previews!`,
               timestamp: new Date()
             }]);
           }
@@ -312,6 +312,7 @@ const DashboardContent: React.FC = () => {
               <Settings className="h-6 w-6 text-white" />
             </button>
         </SimplePreviewTooltip>
+        
       </motion.div>
 
 
