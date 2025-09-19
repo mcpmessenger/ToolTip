@@ -327,12 +327,13 @@ export class SimpleAfterCapture {
 
   private async captureElementAfter(page: Page, element: ClickableElement, url: string): Promise<ElementResult> {
     const elementId = element.id;
+    let elementTimeout: NodeJS.Timeout | null = null;
     
     try {
       console.log(`🎯 Capturing element: ${elementId} (${element.tag})`);
       
       // Set a timeout for the entire element capture process (30 seconds)
-      const elementTimeout = setTimeout(() => {
+      elementTimeout = setTimeout(() => {
         throw new Error(`Element capture timeout for ${elementId}`);
       }, 30000);
       
@@ -472,7 +473,9 @@ export class SimpleAfterCapture {
 
     } catch (error) {
       console.error(`❌ Error capturing element ${elementId}:`, error);
-      clearTimeout(elementTimeout);
+      if (elementTimeout) {
+        clearTimeout(elementTimeout);
+      }
       return {
         elementId,
         afterScreenshot: '',
