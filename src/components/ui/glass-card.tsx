@@ -1,5 +1,25 @@
 import * as React from "react";
-import { Instagram, Twitter, Github, ChevronDown, Send, Search } from "lucide-react";
+import { 
+  Instagram, 
+  Twitter, 
+  Github, 
+  ChevronDown, 
+  Send, 
+  Search, 
+  Play, 
+  Zap, 
+  Eye, 
+  EyeOff, 
+  Globe, 
+  RefreshCw, 
+  Settings, 
+  CheckCircle, 
+  AlertCircle, 
+  Clock,
+  Image,
+  MousePointer,
+  X
+} from "lucide-react";
 const spiderImage = "https://automationalien.s3.us-east-1.amazonaws.com/notextwhite.png";
 
 const ULogo = (props: React.SVGProps<SVGSVGElement>) => (
@@ -21,23 +41,201 @@ export interface Message {
   timestamp: Date;
 }
 
+export interface ScrapingResults {
+  url: string;
+  elements: ScrapedElement[];
+  totalElements: number;
+  successfulPreviews: number;
+  scrapedAt: string;
+}
+
+export interface ScrapedElement {
+  id: string;
+  tag: string;
+  text: string;
+  selector: string;
+  allSelectors?: string[];
+  coordinates: [number, number];
+  visible: boolean;
+  previewId?: string;
+  previewUrl?: string;
+  attributes?: {
+    title?: string | null;
+    'aria-label'?: string | null;
+    'data-testid'?: string | null;
+    href?: string | null;
+    className?: string;
+  };
+}
+
+export interface ScrapingStatus {
+  isScraping: boolean;
+  progress: number;
+  currentElement: string;
+  totalElements: number;
+  completedElements: number;
+  error: string | null;
+}
+
 export interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   onSendMessage?: (message: string) => void;
   messages?: Message[];
   isLoading?: boolean;
   onFileUpload?: (file: File) => void;
   onSearchClick?: () => void;
+  // Proactive scraping props
+  targetUrl?: string;
+  enableProactiveMode?: boolean;
+  apiBaseUrl?: string;
+  onScrapingStart?: (url: string) => void;
+  onScrapingComplete?: (results: ScrapingResults) => void;
+  onScrapingError?: (error: string) => void;
 }
 
 const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
-  ({ className, onSendMessage, messages = [], isLoading = false, onFileUpload, onSearchClick, ...props }, ref) => {
+  ({ 
+    className, 
+    onSendMessage, 
+    messages = [], 
+    isLoading = false, 
+    onFileUpload, 
+    onSearchClick,
+    targetUrl = window.location.href,
+    enableProactiveMode = true,
+    apiBaseUrl = 'http://localhost:3001',
+    onScrapingStart,
+    onScrapingComplete,
+    onScrapingError,
+    ...props 
+  }, ref) => {
     const [inputValue, setInputValue] = React.useState('');
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    
+    // Proactive scraping state
+    const [isProactiveMode, setIsProactiveMode] = React.useState(enableProactiveMode);
+    const [scrapingStatus, setScrapingStatus] = React.useState<ScrapingStatus>({
+      isScraping: false,
+      progress: 0,
+      currentElement: '',
+      totalElements: 0,
+      completedElements: 0,
+      error: null
+    });
+    const [scrapingResults, setScrapingResults] = React.useState<ScrapingResults | null>(null);
+    const [previewCache, setPreviewCache] = React.useState<Map<string, string>>(new Map());
+    const [showScrapingPanel, setShowScrapingPanel] = React.useState(false);
 
     React.useEffect(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // Proactive scraping functions
+    const startProactiveScraping = React.useCallback(async () => {
+      if (scrapingStatus.isScraping) return;
+
+      setScrapingStatus(prev => ({
+        ...prev,
+        isScraping: true,
+        progress: 0,
+        currentElement: '',
+        totalElements: 0,
+        completedElements: 0,
+        error: null
+      }));
+
+      try {
+        onScrapingStart?.(targetUrl);
+
+        const response = await fetch(`${apiBaseUrl}/api/proactive-scrape`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: targetUrl })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to start proactive scraping');
+        }
+
+        const data = await response.json();
+        setScrapingResults(data.data);
+        onScrapingComplete?.(data.data);
+
+        // Preload preview images
+        if (data.data.elements) {
+          const previewPromises = data.data.elements
+            .filter(el => el.previewId)
+            .map(async (el) => {
+              try {
+                const previewResponse = await fetch(`${apiBaseUrl}/api/proactive-scrape/element-preview/${el.previewId}`);
+                if (previewResponse.ok) {
+                  const blob = await previewResponse.blob();
+                  const previewUrl = URL.createObjectURL(blob);
+                  setPreviewCache(prev => new Map(prev).set(el.id, previewUrl));
+                }
+              } catch (err) {
+                console.warn(`Failed to load preview for element ${el.id}:`, err);
+              }
+            });
+
+          await Promise.all(previewPromises);
+        }
+
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+        setScrapingStatus(prev => ({
+          ...prev,
+          isScraping: false,
+          error: errorMessage
+        }));
+        onScrapingError?.(errorMessage);
+      } finally {
+        setScrapingStatus(prev => ({ ...prev, isScraping: false }));
+      }
+    }, [targetUrl, apiBaseUrl, scrapingStatus.isScraping, onScrapingStart, onScrapingComplete, onScrapingError]);
+
+    const getElementPreview = React.useCallback((elementId: string): string | null => {
+      return previewCache.get(elementId) || null;
+    }, [previewCache]);
+
+    const findElement = React.useCallback((selector?: string, text?: string): ScrapedElement | null => {
+      if (!scrapingResults) return null;
+
+      return scrapingResults.elements.find(element => {
+        // Strategy 1: Exact selector match
+        if (selector && element.selector === selector) return true;
+        
+        // Strategy 2: All selectors match
+        if (selector && element.allSelectors?.includes(selector)) return true;
+        
+        // Strategy 3: Text content match (normalized)
+        if (text) {
+          const normalizedElementText = element.text.toLowerCase().replace(/[^\w\s]/g, '').trim();
+          const normalizedTargetText = text.toLowerCase().replace(/[^\w\s]/g, '').trim();
+          if (normalizedElementText.includes(normalizedTargetText) || 
+              normalizedTargetText.includes(normalizedElementText)) return true;
+        }
+        
+        // Strategy 4: Attribute matching
+        if (element.attributes) {
+          if (text && element.attributes.title?.toLowerCase().includes(text.toLowerCase())) return true;
+          if (text && element.attributes['aria-label']?.toLowerCase().includes(text.toLowerCase())) return true;
+          if (selector && element.attributes.href && selector.includes(element.attributes.href)) return true;
+        }
+        
+        return false;
+      }) || null;
+    }, [scrapingResults]);
+
+    // Auto-start scraping when proactive mode is enabled
+    React.useEffect(() => {
+      if (isProactiveMode && !scrapingResults && !scrapingStatus.isScraping) {
+        startProactiveScraping();
+      }
+    }, [isProactiveMode, scrapingResults, scrapingStatus.isScraping, startProactiveScraping]);
 
     const handleSendMessage = () => {
       if (inputValue.trim() && onSendMessage) {
@@ -90,22 +288,185 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
                     <span className="text-xl font-black text-white">
                       Tooltip Companion
                     </span>
-                    <button
-                      onClick={onSearchClick}
-                      className="p-1 hover:bg-white/20 rounded-full transition-colors"
-                      title="Search"
-                    >
-                      <Search className="h-4 w-4 text-white" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setShowScrapingPanel(!showScrapingPanel)}
+                        className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                        title="Proactive Scraping"
+                      >
+                        <Globe className="h-4 w-4 text-white" />
+                      </button>
+                      <button
+                        onClick={onSearchClick}
+                        className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                        title="Search"
+                      >
+                        <Search className="h-4 w-4 text-white" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="text-xs text-zinc-400 mt-1">
-                    Advanced scraping with Playwright
+                  <div className="flex items-center justify-between mt-1">
+                    <div className="text-xs text-zinc-400">
+                      Advanced scraping with Playwright
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {/* Proactive Mode Toggle */}
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-zinc-400">Proactive</span>
+                        <button
+                          onClick={() => setIsProactiveMode(!isProactiveMode)}
+                          className={`relative w-8 h-4 rounded-full transition-colors ${
+                            isProactiveMode ? 'bg-green-500' : 'bg-gray-600'
+                          }`}
+                          title={isProactiveMode ? 'Disable Proactive Mode' : 'Enable Proactive Mode'}
+                        >
+                          <div
+                            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${
+                              isProactiveMode ? 'translate-x-4' : 'translate-x-0.5'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                      
+                      {/* Scraping Status Indicator */}
+                      {scrapingStatus.isScraping && (
+                        <div className="flex items-center gap-1 text-xs text-blue-400">
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                          <span>Scraping...</span>
+                        </div>
+                      )}
+                      
+                      {scrapingResults && !scrapingStatus.isScraping && (
+                        <div className="flex items-center gap-1 text-xs text-green-400">
+                          <CheckCircle className="h-3 w-3" />
+                          <span>{scrapingResults.successfulPreviews}/{scrapingResults.totalElements}</span>
+                        </div>
+                      )}
+                      
+                      {scrapingStatus.error && (
+                        <div className="flex items-center gap-1 text-xs text-red-400">
+                          <AlertCircle className="h-3 w-3" />
+                          <span>Error</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
               
             </div>
             
+            {/* Proactive Scraping Panel */}
+            {showScrapingPanel && (
+              <div className="px-7 py-2 border-b border-white/10 relative z-10">
+                <div className="bg-white/5 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-white font-medium text-sm">Proactive Scraping</h3>
+                    <button
+                      onClick={() => setShowScrapingPanel(false)}
+                      className="p-1 hover:bg-white/10 rounded transition-colors"
+                    >
+                      <X className="h-3 w-3 text-white/60" />
+                    </button>
+                  </div>
+                  
+                  {/* Scraping Status */}
+                  {scrapingStatus.isScraping && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <RefreshCw className="h-4 w-4 text-blue-400 animate-spin" />
+                        <span className="text-white text-sm">Scraping page...</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-1.5">
+                        <div
+                          className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${scrapingStatus.progress}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-white/60">
+                        {scrapingStatus.completedElements}/{scrapingStatus.totalElements} elements
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Results Summary */}
+                  {scrapingResults && !scrapingStatus.isScraping && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-400" />
+                        <span className="text-white text-sm">Scraping Complete</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-white/5 rounded p-2">
+                          <div className="text-white/60">Elements Found</div>
+                          <div className="text-white font-semibold">{scrapingResults.totalElements}</div>
+                        </div>
+                        <div className="bg-white/5 rounded p-2">
+                          <div className="text-white/60">Previews Generated</div>
+                          <div className="text-white font-semibold">{scrapingResults.successfulPreviews}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error State */}
+                  {scrapingStatus.error && (
+                    <div className="flex items-center gap-2 p-2 bg-red-500/20 border border-red-500/30 rounded">
+                      <AlertCircle className="h-4 w-4 text-red-400" />
+                      <span className="text-red-200 text-xs">{scrapingStatus.error}</span>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={startProactiveScraping}
+                      disabled={scrapingStatus.isScraping}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded text-xs text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Play className="h-3 w-3" />
+                      <span>Start Scraping</span>
+                    </button>
+                    <button
+                      onClick={() => setPreviewCache(new Map())}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 rounded text-xs text-white transition-colors"
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      <span>Clear Cache</span>
+                    </button>
+                  </div>
+
+                  {/* Element List */}
+                  {scrapingResults && (
+                    <div className="space-y-1">
+                      <h4 className="text-white font-medium text-xs">Detected Elements</h4>
+                      <div className="space-y-1 max-h-20 overflow-y-auto">
+                        {scrapingResults.elements.slice(0, 5).map((element) => (
+                          <div
+                            key={element.id}
+                            className="flex items-center gap-2 p-1.5 bg-white/5 rounded hover:bg-white/10 transition-colors"
+                          >
+                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                            <span className="text-white text-xs flex-1 truncate">
+                              {element.text || element.attributes?.title || element.tag}
+                            </span>
+                            {element.previewId && (
+                              <Image className="w-3 h-3 text-green-400" />
+                            )}
+                          </div>
+                        ))}
+                        {scrapingResults.elements.length > 5 && (
+                          <div className="text-xs text-white/60 text-center">
+                            +{scrapingResults.elements.length - 5} more elements
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Chat Messages */}
             <div className="flex-1 px-7 py-2 overflow-y-auto space-y-3 relative z-10">
               {messages.map((message, index) => (
@@ -160,20 +521,31 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
               >
                 <input 
                   type="text" 
-                  placeholder="Fresh crawl - Enter URL or drag & drop a file..."
+                  placeholder={isProactiveMode ? "Proactive mode - Enter URL to scrape..." : "Fresh crawl - Enter URL or drag & drop a file..."}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
                   className="flex-1 bg-transparent text-white text-sm placeholder:text-zinc-300 border-none outline-none relative z-30 text-left"
                   style={{ textAlign: 'left' }}
                 />
-                <button 
-                  onClick={handleSendMessage}
-                  disabled={!inputValue.trim() || isLoading}
-                  className="p-1 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative z-30"
-                >
-                  <Send className="h-4 w-4 text-white" />
-                </button>
+                {isProactiveMode ? (
+                  <button 
+                    onClick={startProactiveScraping}
+                    disabled={scrapingStatus.isScraping}
+                    className="p-1 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative z-30"
+                    title="Start Proactive Scraping"
+                  >
+                    <Play className="h-4 w-4 text-white" />
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleSendMessage}
+                    disabled={!inputValue.trim() || isLoading}
+                    className="p-1 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative z-30"
+                  >
+                    <Send className="h-4 w-4 text-white" />
+                  </button>
+                )}
               </div>
               
               {/* Hidden file input */}
@@ -187,9 +559,19 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
               
               {/* Quick actions */}
               <div className="mt-2 flex gap-2 text-xs text-zinc-400">
-                <span>Press Enter to crawl</span>
-                <span>•</span>
-                <span>Drag files to upload</span>
+                {isProactiveMode ? (
+                  <>
+                    <span>Proactive scraping enabled</span>
+                    <span>•</span>
+                    <span>Click Play to start</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Press Enter to crawl</span>
+                    <span>•</span>
+                    <span>Drag files to upload</span>
+                  </>
+                )}
               </div>
             </div>
           </div>

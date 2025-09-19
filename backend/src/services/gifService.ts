@@ -1,5 +1,5 @@
 import { chromium, Browser, Page } from 'playwright';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { gifGenerator } from './gifGenerator';
@@ -99,20 +99,51 @@ export class GifService {
           progress: 50
         });
 
-        // Find and click the target element
+        // Find and interact with the target element using a robust sequence
         let element = null;
-        
+
         if (request.element_selector) {
           element = await page.$(request.element_selector);
         } else if (request.element_text) {
           element = await page.locator(`text=${request.element_text}`).first();
-        } else if (request.coordinates) {
-          // Click at specific coordinates
-          await page.mouse.click(request.coordinates[0], request.coordinates[1]);
         }
 
-        if (element && !request.coordinates) {
-          await element.click();
+        if (request.coordinates && !element) {
+          // Click at specific coordinates if no selector/text was found
+          await page.mouse.move(request.coordinates[0], request.coordinates[1]);
+          await page.mouse.down();
+          await page.mouse.up();
+        }
+
+        if (element) {
+          try {
+            // Scroll into view and focus
+            await element.scrollIntoViewIfNeeded().catch(() => {});
+            await element.focus().catch(() => {});
+
+            // If bounding box available, move mouse there and perform mouse sequence
+            const box = await element.boundingBox();
+            if (box) {
+              const cx = box.x + box.width / 2;
+              const cy = box.y + box.height / 2;
+              await page.mouse.move(cx, cy, { steps: 6 }).catch(() => {});
+              // Fire pointer/mouse sequence
+              await page.mouse.down().catch(() => {});
+              await page.mouse.up().catch(() => {});
+            }
+
+            // Also dispatch synthetic pointer/mouse events in page context as a fallback
+            await page.evaluate((sel) => {
+              if (!sel) return;
+              const el = document.querySelector(String(sel)) as HTMLElement | null;
+              if (!el) return;
+              ['pointerdown', 'mousedown', 'mouseup', 'click'].forEach(evt => {
+                el.dispatchEvent(new MouseEvent(evt, { bubbles: true, cancelable: true }));
+              });
+            }, request.element_selector).catch(() => {});
+          } catch (e) {
+            console.warn('Robust interaction failed:', e);
+          }
         }
 
         // Wait for the page to respond
@@ -125,7 +156,70 @@ export class GifService {
         });
 
         // Take after screenshot
-        const afterScreenshot = await page.screenshot({ fullPage: false });
+        let afterScreenshot = await page.screenshot({ fullPage: false });
+
+        // If after screenshot is identical or nearly identical to before, try synthetic event and retry
+        const buffersEqual = (a: Buffer, b: Buffer) => {
+          if (!a || !b) return false;
+          if (a.length !== b.length) return false;
+          // simple byte equality – cheap check
+          for (let i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) return false;
+          }
+          return true;
+        };
+
+        if (buffersEqual(beforeScreenshot, afterScreenshot)) {
+          // Try a synthetic click event dispatch as some sites rely on event delegation
+          try {
+            const attempts = 2;
+            for (let attempt = 0; attempt < attempts; attempt++) {
+              // Dispatch synthetic click or coordinate click
+              console.log(`Crawl ${crawlId}: synthetic click attempt ${attempt + 1}/${attempts}`);
+              if (request.element_selector) {
+                await page.evaluate((sel) => {
+                  const el = document.querySelector(sel) as HTMLElement | null;
+                  if (el) {
+                    el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+                  }
+                }, request.element_selector).catch(() => {});
+              } else if (request.element_text) {
+                await page.evaluate((text) => {
+                  const el = Array.from(document.querySelectorAll('*')).find(n => n.textContent && n.textContent.trim().includes(text)) as HTMLElement | undefined;
+                  if (el) el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+                }, request.element_text).catch(() => {});
+              } else if (request.coordinates) {
+                await page.mouse.click(request.coordinates[0], request.coordinates[1]).catch(() => {});
+              }
+
+              // Wait longer on each attempt
+              const waitSeconds = (request.wait_time || 2.0) * (attempt + 1);
+              await page.waitForTimeout(waitSeconds * 1000);
+
+              // Retry screenshot
+              afterScreenshot = await page.screenshot({ fullPage: false });
+
+              if (!buffersEqual(beforeScreenshot, afterScreenshot)) {
+                console.log(`Crawl ${crawlId}: afterScreenshot changed on attempt ${attempt + 1}`);
+                break;
+              }
+            }
+          } catch (e) {
+            console.warn('Synthetic click attempt failed:', e);
+          }
+        }
+        if (buffersEqual(beforeScreenshot, afterScreenshot)) {
+          console.log(`Crawl ${crawlId}: afterScreenshot still identical to before after synthetic attempts`);
+          try {
+            const debugBefore = join(this.outputDir, `${crawlId}_debug_before.png`);
+            const debugAfter = join(this.outputDir, `${crawlId}_debug_after.png`);
+            writeFileSync(debugBefore, beforeScreenshot);
+            writeFileSync(debugAfter, afterScreenshot);
+            console.log(`Crawl ${crawlId}: wrote debug images to ${debugBefore} and ${debugAfter}`);
+          } catch (e) {
+            console.warn('Failed to write debug images:', e);
+          }
+        }
         
         this.activeCrawls.set(crawlId, {
           ...this.activeCrawls.get(crawlId)!,

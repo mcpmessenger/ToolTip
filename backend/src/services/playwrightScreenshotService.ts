@@ -132,23 +132,60 @@ class PlaywrightScreenshotService {
       let screenshotData: Buffer;
 
       if (options.selector) {
-        // Click the element and take screenshot
+        // Click the element and take screenshot — handle cases where click navigates
         const element = await page.$(options.selector);
         if (!element) {
           throw new Error(`Element not found: ${options.selector}`);
         }
-        
-        // Click the element
-        await element.click();
-        
-        // Wait for any animations or state changes
+
+        // Record URL before click so we can detect navigation (works for full navigation and SPA route changes)
+        const beforeUrl = page.url();
+
+        try {
+          // Perform the click. If it triggers navigation, the URL will change; otherwise page will stay the same.
+          await element.click({ timeout: 3000 }).catch(() => {});
+        } catch (e) {
+          // ignore click errors
+        }
+
+        // Wait briefly for any navigation or UI updates
         await page.waitForTimeout(options.waitTime || 2000);
-        
-        // Take screenshot of the element after click
-        screenshotData = await element.screenshot({
-          type: 'png',
-          quality: 90
-        });
+
+        const afterUrl = page.url();
+        const navigated = beforeUrl !== afterUrl;
+
+        if (navigated) {
+          // The click caused navigation or SPA route change — capture the resulting page
+          try {
+            // Wait a short while for the new page to settle
+            await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+          } catch (e) {
+            // ignore
+          }
+
+          screenshotData = await page.screenshot({
+            type: 'png',
+            quality: 90,
+            fullPage: true
+          });
+        } else {
+          // Try to screenshot the element (re-select in case it was re-rendered)
+          const elementAfter = await page.$(options.selector);
+          if (elementAfter) {
+            try {
+              screenshotData = await elementAfter.screenshot({
+                type: 'png',
+                quality: 90
+              });
+            } catch (e) {
+              // Element screenshot failed (maybe detached) — fallback to a viewport screenshot
+              screenshotData = await page.screenshot({ type: 'png', quality: 90, fullPage: false });
+            }
+          } else {
+            // Element not found after click — just capture the viewport
+            screenshotData = await page.screenshot({ type: 'png', quality: 90, fullPage: false });
+          }
+        }
       } else if (options.coordinates) {
         // Click at coordinates and take screenshot
         await page.mouse.click(options.coordinates[0], options.coordinates[1]);

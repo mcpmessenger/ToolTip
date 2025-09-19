@@ -15,3 +15,5 @@ mkdir -p gifs
 
 echo "Backend dependencies installed successfully!"
 echo "You can now start the backend with: npm run dev"
+
+

@@ -8,6 +8,7 @@ import { Button } from '../components/ui/button';
 import { Settings, X, Play, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HoverGif } from '../components/HoverGif';
+import { ProactiveHoverGif } from '../components/ProactiveHoverGif';
 import { SimplePageScanner } from '../components/SimplePageScanner';
 import { UniversalTooltipDemo } from '../components/UniversalTooltipDemo';
 import AutoTooltipInjector from '../components/AutoTooltipInjector';
@@ -22,6 +23,7 @@ const Dashboard: React.FC = () => {
   const [showUniversalDemo, setShowUniversalDemo] = useState(false);
   const [showPreScrapedDemo, setShowPreScrapedDemo] = useState(false);
   const [showCompanion, setShowCompanion] = useState(true); // Always open by default
+  const [useProactiveMode, setUseProactiveMode] = useState(false);
   
   // Removed cache hook - using original HoverGif
   const [companionPosition, setCompanionPosition] = useState({ 
@@ -138,7 +140,11 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen relative">
         {/* Using original HoverGif components */}
       
-      <AuroraHero hideText={showSettings} onGetStarted={() => setShowCompanion(!showCompanion)} />
+      <AuroraHero 
+        hideText={showSettings} 
+        onGetStarted={() => setShowCompanion(!showCompanion)} 
+        useProactiveMode={useProactiveMode}
+      />
       
       {/* Settings and Demo Icons */}
       <motion.div
@@ -147,95 +153,209 @@ const Dashboard: React.FC = () => {
         transition={{ delay: 1 }}
         className="fixed top-6 right-6 z-50 flex space-x-2"
       >
-        <HoverGif
-          targetUrl={window.location.href}
-          elementSelector="button[title='Simple GIF Demo']"
-          elementText="Simple GIF Demo"
-          waitTime={2.0}
-        >
-          <button
-            onClick={() => setShowSimpleDemo(!showSimpleDemo)}
-            className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
-            title="Simple GIF Demo"
+        {useProactiveMode ? (
+          <ProactiveHoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='Simple GIF Demo']"
+            elementText="Simple GIF Demo"
+            waitTime={2.0}
           >
-            <Zap className="h-6 w-6 text-white" />
-          </button>
-        </HoverGif>
+            <button
+              onClick={() => setShowSimpleDemo(!showSimpleDemo)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="Simple GIF Demo"
+            >
+              <Zap className="h-6 w-6 text-white" />
+            </button>
+          </ProactiveHoverGif>
+        ) : (
+          <HoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='Simple GIF Demo']"
+            elementText="Simple GIF Demo"
+            waitTime={2.0}
+          >
+            <button
+              onClick={() => setShowSimpleDemo(!showSimpleDemo)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="Simple GIF Demo"
+            >
+              <Zap className="h-6 w-6 text-white" />
+            </button>
+          </HoverGif>
+        )}
         
-        <HoverGif
-          targetUrl={window.location.href}
-          elementSelector="button[title='Page Scanner Demo']"
-          elementText="Page Scanner Demo"
-          waitTime={2.0}
-        >
-          <button
-            onClick={() => setShowPageScanner(!showPageScanner)}
-            className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
-            title="Page Scanner Demo"
+        {useProactiveMode ? (
+          <ProactiveHoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='Page Scanner Demo']"
+            elementText="Page Scanner Demo"
+            waitTime={2.0}
           >
-            🔍
-          </button>
-        </HoverGif>
+            <button
+              onClick={() => setShowPageScanner(!showPageScanner)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="Page Scanner Demo"
+            >
+              🔍
+            </button>
+          </ProactiveHoverGif>
+        ) : (
+          <HoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='Page Scanner Demo']"
+            elementText="Page Scanner Demo"
+            waitTime={2.0}
+          >
+            <button
+              onClick={() => setShowPageScanner(!showPageScanner)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="Page Scanner Demo"
+            >
+              🔍
+            </button>
+          </HoverGif>
+        )}
         
-        <HoverGif
-          targetUrl={window.location.href}
-          elementSelector="button[title='Universal Tooltip Demo']"
-          elementText="Universal Tooltip Demo"
-          waitTime={2.0}
-        >
-          <button
-            onClick={() => setShowUniversalDemo(!showUniversalDemo)}
-            className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
-            title="Universal Tooltip Demo"
+        {useProactiveMode ? (
+          <ProactiveHoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='Universal Tooltip Demo']"
+            elementText="Universal Tooltip Demo"
+            waitTime={2.0}
           >
-            🎯
-          </button>
-        </HoverGif>
+            <button
+              onClick={() => setShowUniversalDemo(!showUniversalDemo)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="Universal Tooltip Demo"
+            >
+              🎯
+            </button>
+          </ProactiveHoverGif>
+        ) : (
+          <HoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='Universal Tooltip Demo']"
+            elementText="Universal Tooltip Demo"
+            waitTime={2.0}
+          >
+            <button
+              onClick={() => setShowUniversalDemo(!showUniversalDemo)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="Universal Tooltip Demo"
+            >
+              🎯
+            </button>
+          </HoverGif>
+        )}
         
-        <HoverGif
-          targetUrl={window.location.href}
-          elementSelector="button[title='Pre-Scraped Demo']"
-          elementText="Pre-Scraped Demo"
-          waitTime={2.0}
-        >
-          <button
-            onClick={() => setShowPreScrapedDemo(!showPreScrapedDemo)}
-            className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
-            title="Pre-Scraped Demo"
+        {useProactiveMode ? (
+          <ProactiveHoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='Pre-Scraped Demo']"
+            elementText="Pre-Scraped Demo"
+            waitTime={2.0}
           >
-            ⚡
-          </button>
-        </HoverGif>
+            <button
+              onClick={() => setShowPreScrapedDemo(!showPreScrapedDemo)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="Pre-Scraped Demo"
+            >
+              ⚡
+            </button>
+          </ProactiveHoverGif>
+        ) : (
+          <HoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='Pre-Scraped Demo']"
+            elementText="Pre-Scraped Demo"
+            waitTime={2.0}
+          >
+            <button
+              onClick={() => setShowPreScrapedDemo(!showPreScrapedDemo)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="Pre-Scraped Demo"
+            >
+              ⚡
+            </button>
+          </HoverGif>
+        )}
         
-        <HoverGif
-          targetUrl={window.location.href}
-          elementSelector="button[title='GIF Crawl Demo']"
-          elementText="GIF Crawl Demo"
-          waitTime={2.0}
-        >
-          <button
-            onClick={() => setShowGifDemo(!showGifDemo)}
-            className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
-            title="GIF Crawl Demo"
+        {useProactiveMode ? (
+          <ProactiveHoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='GIF Crawl Demo']"
+            elementText="GIF Crawl Demo"
+            waitTime={2.0}
           >
-            <Play className="h-6 w-6 text-white" />
-          </button>
-        </HoverGif>
+            <button
+              onClick={() => setShowGifDemo(!showGifDemo)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="GIF Crawl Demo"
+            >
+              <Play className="h-6 w-6 text-white" />
+            </button>
+          </ProactiveHoverGif>
+        ) : (
+          <HoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='GIF Crawl Demo']"
+            elementText="GIF Crawl Demo"
+            waitTime={2.0}
+          >
+            <button
+              onClick={() => setShowGifDemo(!showGifDemo)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="GIF Crawl Demo"
+            >
+              <Play className="h-6 w-6 text-white" />
+            </button>
+          </HoverGif>
+        )}
         
-        <HoverGif
-          targetUrl={window.location.href}
-          elementSelector="button[title='Settings']"
-          elementText="Settings"
-          waitTime={2.0}
+        <button
+          onClick={() => setUseProactiveMode(!useProactiveMode)}
+          className={`p-3 rounded-full transition-all duration-300 ${
+            useProactiveMode 
+              ? 'bg-green-500/20 hover:bg-green-500/30' 
+              : 'hover:bg-white/10'
+          }`}
+          title={useProactiveMode ? 'Proactive Mode ON' : 'Proactive Mode OFF'}
         >
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
-            title="Settings"
+          <div className={`w-6 h-6 rounded-full ${useProactiveMode ? 'bg-green-500' : 'bg-gray-500'}`}></div>
+        </button>
+        
+        {useProactiveMode ? (
+          <ProactiveHoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='Settings']"
+            elementText="Settings"
+            waitTime={2.0}
           >
-            <Settings className="h-6 w-6 text-white" />
-          </button>
-        </HoverGif>
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="Settings"
+            >
+              <Settings className="h-6 w-6 text-white" />
+            </button>
+          </ProactiveHoverGif>
+        ) : (
+          <HoverGif
+            targetUrl={window.location.href}
+            elementSelector="button[title='Settings']"
+            elementText="Settings"
+            waitTime={2.0}
+          >
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="p-3 hover:bg-white/10 rounded-full transition-all duration-300"
+              title="Settings"
+            >
+              <Settings className="h-6 w-6 text-white" />
+            </button>
+          </HoverGif>
+        )}
       </motion.div>
 
 
@@ -532,6 +652,37 @@ const Dashboard: React.FC = () => {
                 onFileUpload={handleFileUpload}
                 onSearchClick={() => console.log('Search clicked')}
                 className="w-full h-full"
+                // Proactive scraping props
+                targetUrl={window.location.href}
+                enableProactiveMode={useProactiveMode}
+                apiBaseUrl="http://localhost:3001"
+                onScrapingStart={(url) => {
+                  console.log('Proactive scraping started for:', url);
+                  setMessages(prev => [...prev, {
+                    id: Date.now().toString(),
+                    type: 'ai',
+                    content: `🚀 Starting proactive scraping for ${url}...`,
+                    timestamp: new Date()
+                  }]);
+                }}
+                onScrapingComplete={(results) => {
+                  console.log('Proactive scraping completed:', results);
+                  setMessages(prev => [...prev, {
+                    id: Date.now().toString(),
+                    type: 'ai',
+                    content: `✅ Proactive scraping completed! Found ${results.totalElements} elements with ${results.successfulPreviews} previews generated.`,
+                    timestamp: new Date()
+                  }]);
+                }}
+                onScrapingError={(error) => {
+                  console.error('Proactive scraping error:', error);
+                  setMessages(prev => [...prev, {
+                    id: Date.now().toString(),
+                    type: 'ai',
+                    content: `❌ Proactive scraping failed: ${error}`,
+                    timestamp: new Date()
+                  }]);
+                }}
               />
               {/* Resize handle */}
               <div className="resize-handle absolute bottom-0 right-0 w-4 h-4 bg-blue-500/50 hover:bg-blue-500/70 cursor-se-resize rounded-tl-lg flex items-center justify-center">

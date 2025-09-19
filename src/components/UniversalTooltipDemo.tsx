@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HoverGif } from './HoverGif';
+import { ProactiveHoverGif } from './ProactiveHoverGif';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
@@ -18,6 +19,7 @@ export const UniversalTooltipDemo: React.FC<UniversalTooltipDemoProps> = ({
   const [elements, setElements] = useState<any[]>([]);
   const [isScanning, setIsScanning] = useState(false);
   const [currentUrl, setCurrentUrl] = useState<string>('');
+  const [useProactiveScraping, setUseProactiveScraping] = useState(true);
   const { getPageElements } = useCrawling();
 
   // Get current page URL
@@ -102,7 +104,10 @@ export const UniversalTooltipDemo: React.FC<UniversalTooltipDemoProps> = ({
             <CardTitle className="text-2xl font-bold">Universal Tooltip Demo</CardTitle>
             <CardDescription>
               Hover over any button, link, or input below to see animated previews of what happens when you click them.
-              All elements are automatically wrapped with tooltip functionality.
+              {useProactiveScraping ? 
+                " Proactive mode scans the page and pre-generates previews for all clickable elements, showing you exactly what happens when you click each one." :
+                " Standard mode generates previews on-demand when you hover over elements."
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -111,6 +116,13 @@ export const UniversalTooltipDemo: React.FC<UniversalTooltipDemoProps> = ({
               <Badge variant="outline">Elements Found: {elements.length}</Badge>
               <Button onClick={scanPage} disabled={isScanning} size="sm">
                 {isScanning ? 'Scanning...' : 'Rescan Page'}
+              </Button>
+              <Button 
+                onClick={() => setUseProactiveScraping(!useProactiveScraping)} 
+                variant={useProactiveScraping ? "default" : "outline"}
+                size="sm"
+              >
+                {useProactiveScraping ? 'Proactive Mode' : 'Standard Mode'}
               </Button>
             </div>
           </CardContent>
@@ -126,19 +138,22 @@ export const UniversalTooltipDemo: React.FC<UniversalTooltipDemoProps> = ({
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
-              {demoButtons.map((button) => (
-                <HoverGif
-                  key={button.id}
-                  targetUrl={targetUrl}
-                  elementSelector={button.selector}
-                  elementText={button.text}
-                  waitTime={2.0}
-                >
-                  <Button variant={button.variant} className={button.id === 'btn1' ? 'primary' : ''}>
-                    {button.text}
-                  </Button>
-                </HoverGif>
-              ))}
+              {demoButtons.map((button) => {
+                const HoverComponent = useProactiveScraping ? ProactiveHoverGif : HoverGif;
+                return (
+                  <HoverComponent
+                    key={button.id}
+                    targetUrl={targetUrl}
+                    elementSelector={button.selector}
+                    elementText={button.text}
+                    waitTime={2.0}
+                  >
+                    <Button variant={button.variant} className={button.id === 'btn1' ? 'primary' : ''}>
+                      {button.text}
+                    </Button>
+                  </HoverComponent>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -153,19 +168,22 @@ export const UniversalTooltipDemo: React.FC<UniversalTooltipDemoProps> = ({
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
-              {demoLinks.map((link) => (
-                <HoverGif
-                  key={link.id}
-                  targetUrl={targetUrl}
-                  elementSelector={link.selector}
-                  elementText={link.text}
-                  waitTime={2.0}
-                >
-                  <Button variant="link" asChild>
-                    <a href={link.href}>{link.text}</a>
-                  </Button>
-                </HoverGif>
-              ))}
+              {demoLinks.map((link) => {
+                const HoverComponent = useProactiveScraping ? ProactiveHoverGif : HoverGif;
+                return (
+                  <HoverComponent
+                    key={link.id}
+                    targetUrl={targetUrl}
+                    elementSelector={link.selector}
+                    elementText={link.text}
+                    waitTime={2.0}
+                  >
+                    <Button variant="link" asChild>
+                      <a href={link.href}>{link.text}</a>
+                    </Button>
+                  </HoverComponent>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -180,22 +198,25 @@ export const UniversalTooltipDemo: React.FC<UniversalTooltipDemoProps> = ({
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
-              {demoInputs.map((input) => (
-                <HoverGif
-                  key={input.id}
-                  targetUrl={targetUrl}
-                  elementSelector={input.selector}
-                  elementText={input.value}
-                  waitTime={2.0}
-                >
-                  <input
-                    type={input.type}
-                    value={input.value}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
-                    readOnly
-                  />
-                </HoverGif>
-              ))}
+              {demoInputs.map((input) => {
+                const HoverComponent = useProactiveScraping ? ProactiveHoverGif : HoverGif;
+                return (
+                  <HoverComponent
+                    key={input.id}
+                    targetUrl={targetUrl}
+                    elementSelector={input.selector}
+                    elementText={input.value}
+                    waitTime={2.0}
+                  >
+                    <input
+                      type={input.type}
+                      value={input.value}
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
+                      readOnly
+                    />
+                  </HoverComponent>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -210,41 +231,48 @@ export const UniversalTooltipDemo: React.FC<UniversalTooltipDemoProps> = ({
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
-              <HoverGif
-                targetUrl={targetUrl}
-                elementSelector=".custom-btn"
-                elementText="Custom Button"
-                waitTime={2.0}
-              >
-                <div className="custom-btn px-4 py-2 bg-purple-500 text-white rounded cursor-pointer hover:bg-purple-600">
-                  Custom Button
-                </div>
-              </HoverGif>
+              {(() => {
+                const HoverComponent = useProactiveScraping ? ProactiveHoverGif : HoverGif;
+                return (
+                  <>
+                    <HoverComponent
+                      targetUrl={targetUrl}
+                      elementSelector=".custom-btn"
+                      elementText="Custom Button"
+                      waitTime={2.0}
+                    >
+                      <div className="custom-btn px-4 py-2 bg-purple-500 text-white rounded cursor-pointer hover:bg-purple-600">
+                        Custom Button
+                      </div>
+                    </HoverComponent>
 
-              <HoverGif
-                targetUrl={targetUrl}
-                elementSelector="[data-action='save']"
-                elementText="Save Data"
-                waitTime={2.0}
-              >
-                <div 
-                  data-action="save"
-                  className="px-4 py-2 bg-green-500 text-white rounded cursor-pointer hover:bg-green-600"
-                >
-                  Save Data
-                </div>
-              </HoverGif>
+                    <HoverComponent
+                      targetUrl={targetUrl}
+                      elementSelector="[data-action='save']"
+                      elementText="Save Data"
+                      waitTime={2.0}
+                    >
+                      <div 
+                        data-action="save"
+                        className="px-4 py-2 bg-green-500 text-white rounded cursor-pointer hover:bg-green-600"
+                      >
+                        Save Data
+                      </div>
+                    </HoverComponent>
 
-              <HoverGif
-                targetUrl={targetUrl}
-                elementSelector=".icon-button"
-                elementText="Icon Button"
-                waitTime={2.0}
-              >
-                <button className="icon-button p-2 bg-gray-500 text-white rounded-full hover:bg-gray-600">
-                  ⚙️
-                </button>
-              </HoverGif>
+                    <HoverComponent
+                      targetUrl={targetUrl}
+                      elementSelector=".icon-button"
+                      elementText="Icon Button"
+                      waitTime={2.0}
+                    >
+                      <button className="icon-button p-2 bg-gray-500 text-white rounded-full hover:bg-gray-600">
+                        ⚙️
+                      </button>
+                    </HoverComponent>
+                  </>
+                );
+              })()}
             </div>
           </CardContent>
         </Card>
@@ -260,18 +288,24 @@ export const UniversalTooltipDemo: React.FC<UniversalTooltipDemoProps> = ({
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                   <span className="text-blue-600 font-bold">1</span>
                 </div>
-                <h3 className="font-semibold">Auto-Detection</h3>
+                <h3 className="font-semibold">{useProactiveScraping ? 'Proactive Scanning' : 'Auto-Detection'}</h3>
                 <p className="text-sm text-gray-600">
-                  Automatically detects buttons, links, and clickable elements
+                  {useProactiveScraping ? 
+                    'Scans the entire page and clicks every element to generate previews' :
+                    'Automatically detects buttons, links, and clickable elements'
+                  }
                 </p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
                   <span className="text-green-600 font-bold">2</span>
                 </div>
-                <h3 className="font-semibold">Hover Preview</h3>
+                <h3 className="font-semibold">Real Preview</h3>
                 <p className="text-sm text-gray-600">
-                  Shows animated GIF preview when you hover over elements
+                  {useProactiveScraping ?
+                    'Shows actual screenshots of what happens when you click each element' :
+                    'Shows animated GIF preview when you hover over elements'
+                  }
                 </p>
               </div>
               <div className="text-center">
@@ -280,7 +314,10 @@ export const UniversalTooltipDemo: React.FC<UniversalTooltipDemoProps> = ({
                 </div>
                 <h3 className="font-semibold">Smart Caching</h3>
                 <p className="text-sm text-gray-600">
-                  Caches results for better performance and faster loading
+                  {useProactiveScraping ?
+                    'Pre-generates and caches all previews for instant hover responses' :
+                    'Caches results for better performance and faster loading'
+                  }
                 </p>
               </div>
             </div>

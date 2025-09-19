@@ -6,6 +6,7 @@ import { crawlRouter } from './routes/crawl';
 import { gifCrawlRouter } from './routes/gifCrawl';
 import { pageScannerRouter } from './routes/pageScanner';
 import screenshotRouter from './routes/screenshot';
+import { proactiveScrapingRouter } from './routes/proactiveScraping';
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +31,7 @@ app.use(express.json());
 app.use('/api/chat', chatRouter);
 app.use('/api/crawl', crawlRouter);
 app.use('/api', gifCrawlRouter);
+app.use('/api/proactive-scrape', proactiveScrapingRouter);
 app.use('/', pageScannerRouter);
 app.use('/', screenshotRouter);
 
