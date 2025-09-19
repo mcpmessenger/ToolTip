@@ -3,8 +3,8 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "🚀 Starting ToolTip Companion v1.1 build (No Canvas Version)..."
-        - echo "📦 Installing frontend dependencies..."
+        - echo "🚀 Starting ToolTip Companion v1.1 build..."
+        - echo "📦 Using frontend-only build without canvas dependencies..."
         - cp package-amplify.json package.json
         - npm ci
     build:
@@ -13,7 +13,6 @@ frontend:
         - npm run build
         - echo "📦 Installing backend dependencies..."
         - cd backend
-        - cp package-amplify.json package.json
         - npm ci
         - echo "🏗️ Building backend..."
         - npm run build

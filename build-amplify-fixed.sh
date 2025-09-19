@@ -7,8 +7,8 @@ echo "🚀 Starting enhanced build process for ToolTip Companion v1.1"
 
 # Install system dependencies for canvas
 echo "📦 Installing system dependencies for canvas..."
-yum update -y
-yum install -y giflib-devel libjpeg-turbo-devel libpng-devel cairo-devel pango-devel
+sudo yum update -y
+sudo yum install -y giflib-devel libjpeg-turbo-devel libpng-devel cairo-devel pango-devel
 
 # Install frontend dependencies (using Amplify-specific package.json)
 echo "📦 Installing frontend dependencies..."
