@@ -6,8 +6,7 @@ import {
   motion,
   animate,
 } from "framer-motion";
-import { HoverGif } from "../HoverGif";
-import { ProactiveHoverGif } from "../ProactiveHoverGif";
+import { SimplePreviewTooltip } from "../SimplePreviewTooltip";
 
 const COLORS_TOP = ["#13FFAA", "#1E67C6", "#CE84CF", "#DD335C"];
 
@@ -71,108 +70,54 @@ export const AuroraHero = ({ hideText = false, onGetStarted, useProactiveMode = 
             Beautiful Interactive Tooltips for React
           </motion.p>
           <div className="flex flex-col sm:flex-row gap-4 items-center">
-          {useProactiveMode ? (
-            <ProactiveHoverGif
-              targetUrl={window.location.href}
-              elementSelector="button[title='Get Started']"
-              elementText="Get Started"
-              waitTime={2.0}
+          <SimplePreviewTooltip
+            targetUrl={window.location.href}
+            elementId="get-started-button"
+          >
+            <motion.button
+              id="get-started-button"
+              onClick={onGetStarted}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              style={{
+                border,
+                boxShadow,
+              }}
+              whileHover={{
+                scale: 1.015,
+              }}
+              whileTap={{
+                scale: 0.985,
+              }}
+              className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-6 py-3 text-gray-50 transition-colors hover:bg-gray-950/50 text-lg font-semibold"
+              title="Get Started - Hover to see animated preview"
             >
-              <motion.button
-                onClick={onGetStarted}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                style={{
-                  border,
-                  boxShadow,
-                }}
-                whileHover={{
-                  scale: 1.015,
-                }}
-                whileTap={{
-                  scale: 0.985,
-                }}
-                className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-6 py-3 text-gray-50 transition-colors hover:bg-gray-950/50 text-lg font-semibold"
-                title="Get Started"
-              >
-                Get Started
-                <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
-              </motion.button>
-            </ProactiveHoverGif>
-          ) : (
-            <HoverGif
-              targetUrl="https://github.com/mcpmessenger/ToolTip"
-              elementSelector=".repository-content"
-              waitTime={2.0}
-            >
-              <motion.button
-                onClick={onGetStarted}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                style={{
-                  border,
-                  boxShadow,
-                }}
-                whileHover={{
-                  scale: 1.015,
-                }}
-                whileTap={{
-                  scale: 0.985,
-                }}
-                className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-6 py-3 text-gray-50 transition-colors hover:bg-gray-950/50 text-lg font-semibold"
-              >
-                Get Started
-                <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
-              </motion.button>
-            </HoverGif>
-          )}
+              Get Started
+              <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
+            </motion.button>
+          </SimplePreviewTooltip>
             
-            {useProactiveMode ? (
-              <ProactiveHoverGif
-                targetUrl={window.location.href}
-                elementSelector="a[href='https://github.com/mcpmessenger/ToolTip']"
-                elementText="View Documentation"
-                waitTime={2.0}
+            <SimplePreviewTooltip
+              targetUrl="https://github.com/mcpmessenger/ToolTip"
+              elementId="view-documentation-button"
+            >
+              <motion.a
+                id="view-documentation-button"
+                href="https://github.com/mcpmessenger/ToolTip"
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.0 }}
+                className="group relative flex w-fit items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 text-gray-50 transition-all hover:bg-white/20 hover:border-white/30 text-lg font-semibold"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <motion.a
-                  href="https://github.com/mcpmessenger/ToolTip"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.0 }}
-                  className="group relative flex w-fit items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 text-gray-50 transition-all hover:bg-white/20 hover:border-white/30 text-lg font-semibold"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  📚 View Documentation
-                  <FiArrowRight className="transition-transform group-hover:translate-x-1" />
-                </motion.a>
-              </ProactiveHoverGif>
-            ) : (
-              <HoverGif
-                targetUrl="https://github.com/mcpmessenger/ToolTip"
-                elementSelector=".repository-content"
-                waitTime={2.0}
-              >
-                <motion.a
-                  href="https://github.com/mcpmessenger/ToolTip"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.0 }}
-                  className="group relative flex w-fit items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 text-gray-50 transition-all hover:bg-white/20 hover:border-white/30 text-lg font-semibold"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  📚 View Documentation
-                  <FiArrowRight className="transition-transform group-hover:translate-x-1" />
-                </motion.a>
-              </HoverGif>
-            )}
+                📚 View Documentation
+                <FiArrowRight className="transition-transform group-hover:translate-x-1" />
+              </motion.a>
+            </SimplePreviewTooltip>
           </div>
         </div>
       )}

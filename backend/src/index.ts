@@ -6,7 +6,9 @@ import { crawlRouter } from './routes/crawl';
 import { gifCrawlRouter } from './routes/gifCrawl';
 import { pageScannerRouter } from './routes/pageScanner';
 import screenshotRouter from './routes/screenshot';
-import { proactiveScrapingRouter } from './routes/proactiveScraping';
+import elementAnalysisRouter from './routes/elementAnalysis';
+import simpleScannerRouter from './routes/simpleScanner';
+import simpleAfterCaptureRouter from './routes/simpleAfterCapture';
 
 // Load environment variables
 dotenv.config();
@@ -31,7 +33,11 @@ app.use(express.json());
 app.use('/api/chat', chatRouter);
 app.use('/api/crawl', crawlRouter);
 app.use('/api', gifCrawlRouter);
-app.use('/api/proactive-scrape', proactiveScrapingRouter);
+// app.use('/api/proactive-scrape', proactiveScrapingRouter); // DISABLED - using simpleAfterCapture instead
+// app.use('/api/gif-preview', gifPreviewRouter); // DISABLED - using simpleAfterCapture instead
+app.use('/api/analyze-element', elementAnalysisRouter);
+app.use('/api/simple-scanner', simpleScannerRouter);
+app.use('/api/after-capture', simpleAfterCaptureRouter);
 app.use('/', pageScannerRouter);
 app.use('/', screenshotRouter);
 

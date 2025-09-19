@@ -38,7 +38,7 @@ export class GifGenerator {
       useClones: false
     });
     
-    this.outputDir = join(process.cwd(), 'gifs');
+    this.outputDir = join(process.cwd(), 'proactive-previews');
     if (!existsSync(this.outputDir)) {
       mkdirSync(this.outputDir, { recursive: true });
     }
@@ -112,9 +112,32 @@ export class GifGenerator {
    * Create a simple before/after comparison
    */
   private createSimpleComparison(beforeBuffer: Buffer, afterBuffer: Buffer): Buffer {
-    // For now, just return the before screenshot
-    // In production, you'd use a proper image library like sharp or jimp
-    return beforeBuffer;
+    // Check if the buffers are different
+    const areDifferent = !this.buffersEqual(beforeBuffer, afterBuffer);
+    
+    if (areDifferent) {
+      console.log('Screenshots are different, using after screenshot');
+      return afterBuffer;
+    } else {
+      console.log('Screenshots are identical, using before screenshot');
+      return beforeBuffer;
+    }
+  }
+
+  /**
+   * Check if two buffers are equal
+   */
+  private buffersEqual(a: Buffer, b: Buffer): boolean {
+    if (!a || !b) return false;
+    if (a.length !== b.length) return false;
+    
+    // Check first 1000 bytes for quick comparison
+    const checkLength = Math.min(1000, a.length);
+    for (let i = 0; i < checkLength; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    
+    return true;
   }
 
   /**

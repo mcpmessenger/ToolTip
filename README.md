@@ -1,185 +1,220 @@
-# ToolTip Companion
+# ToolTip Companion v1.0
 
-A beautiful 3D glass card interface with AI-powered chat functionality and intelligent web crawling capabilities.
+Beautiful Interactive Tooltips for React with Proactive Screenshot Capture
 
-![ToolTip Companion](https://img.shields.io/badge/React-18-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue) ![Vite](https://img.shields.io/badge/Vite-5.0-purple) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-cyan)
+## 🎯 Overview
 
-## ✨ Features
+ToolTip Companion is a React component library that provides intelligent tooltips with **proactive screenshot capture**. When you hover over any clickable element, you see a preview of what happens when you click it - captured automatically by Playwright.
 
-- **3D Glass Card Interface** - Stunning 3D hover effects with glass morphism design
-- **AI-Powered Chat** - Intelligent conversations with OpenAI integration
-- **Web Crawling** - Smart web crawling with mock API (ready for backend integration)
-- **Real-time Data Storage** - Supabase integration for persistent data
-- **Responsive Design** - Works seamlessly across all devices
-- **Modern UI/UX** - Built with Shadcn UI and Tailwind CSS
+## 🔄 System Flow
 
-## 🚀 Quick Start
+### 1. **Page Load & Proactive Scraping**
+```
+User visits page → Frontend loads → Triggers proactive scraping
+```
 
-### Prerequisites
+### 2. **Backend Playwright Automation**
+```
+Backend receives scrape request → Playwright launches browser → Navigates to page
+```
 
-- Node.js 18+ 
+### 3. **Button Discovery & Testing**
+```
+Playwright finds all clickable elements → For each button:
+  ├── Click the button
+  ├── Wait for navigation/state change
+  ├── Capture full page "after" screenshot
+  └── Compress image to base64
+```
+
+### 4. **Local Storage Caching**
+```
+Backend returns all results → Frontend stores each button's "after" image in Local Storage
+```
+
+### 5. **Tooltip Display**
+```
+User hovers over button → Frontend retrieves pre-captured "after" image from Local Storage → Shows in tooltip
+```
+
+## 🏗️ Architecture
+
+### **Frontend (React)**
+- **Production**: [https://tooltipcompanion.com/](https://tooltipcompanion.com/)
+- **Development**: `http://localhost:8091` (auto-detected available port)
+- **Components**: 
+  - `SimplePreviewTooltip` - Main tooltip component
+  - `futurastic-hero-section` - Hero section with "Get Started" button
+  - `Dashboard` - Main dashboard with "View Documentation" button
+
+### **Backend (Express.js + Playwright)**
+- **Port**: `http://127.0.0.1:3001`
+- **Services**:
+  - `SimpleAfterCapture` - Proactive screenshot capture service
+  - `ProactiveScrapingService` - Legacy scraping service (disabled)
+
+### **Storage Strategy**
+- **Type**: Local Storage (persists across browser sessions)
+- **Format**: Base64 data URLs (`data:image/jpeg;base64,{base64string}`)
+- **Key Pattern**: `preview_${url}_${elementId}`
+- **Example**: `preview_localhost:8084_get-started-button`
+
+## 🎬 Example Flow
+
+### **Button: "Get Started"**
+1. **Proactive Scraping**: Playwright clicks "Get Started" → Navigates to Settings page
+2. **Screenshot Capture**: Full page screenshot of Settings page with "Proactive Mode" toggle
+3. **Storage**: Base64 image stored in Local Storage
+4. **Tooltip**: User hovers over "Get Started" → Shows Settings page preview
+
+### **Button: "View Documentation"**
+1. **Proactive Scraping**: Playwright clicks "View Documentation" → Navigates to GitHub repository
+2. **Screenshot Capture**: Full page screenshot of GitHub repository page
+3. **Storage**: Base64 image stored in Local Storage
+4. **Tooltip**: User hovers over "View Documentation" → Shows GitHub page preview
+
+## 🔧 Technical Implementation
+
+### **API Endpoints**
+```
+POST /api/after-capture/capture
+├── Input: { url: "http://localhost:8084" }
+├── Process: Proactive scraping with Playwright
+└── Output: { results: [{ elementId, afterGif, title, success }] }
+
+GET /api/after-capture/status
+├── Output: { capturing: boolean, timestamp: string }
+```
+
+### **Local Storage Structure**
+```json
+{
+  "preview_localhost:8084_get-started-button": {
+    "type": "after-gif",
+    "title": "Get Started",
+    "description": "Result after clicking Get Started",
+    "afterGif": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+    "timestamp": "2024-01-20T03:20:58.000Z"
+  }
+}
+```
+
+### **Image Processing**
+- **Capture**: Full page screenshots (1920x1080 viewport)
+- **Compression**: Sharp library (800x600, 80% quality JPEG)
+- **Storage**: Base64 data URLs for browser compatibility
+
+## 🌐 Live Demo
+
+**Production URL**: [https://tooltipcompanion.com/](https://tooltipcompanion.com/)
+
+Experience the tooltip system live with proactive screenshot capture!
+
+## 🚀 Getting Started
+
+### **Prerequisites**
+- Node.js 18+
 - npm or yarn
-- OpenAI API key
-- Supabase account (optional for full functionality)
+- Playwright browsers installed
 
-### Installation
+### **Installation**
+```bash
+# Install dependencies
+npm install
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/mcpmessenger/ToolTip.git
-   cd ToolTip
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   
-   **Frontend (.env in root directory):**
-   ```env
-   VITE_OPENAI_API_KEY=your_openai_api_key_here
-   VITE_SUPABASE_URL=your_supabase_url_here
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
-   VITE_API_BASE_URL=http://localhost:3001
-   ```
-   
-   **Backend (backend/.env):**
-   ```env
-   OPENAI_API_KEY=your_openai_api_key_here
-   SUPABASE_URL=your_supabase_url_here
-   SUPABASE_ANON_KEY=your_supabase_anon_key_here
-   PORT=3001
-   NODE_ENV=development
-   FRONTEND_URL=http://localhost:8082
-   ```
-
-4. **Start both servers**
-   
-   **Terminal 1 - Backend:**
-   ```bash
-   cd backend
-   npm install
-   npm run dev
-   ```
-   
-   **Terminal 2 - Frontend:**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser**
-   Navigate to `http://localhost:8082` (or the port shown in terminal)
-
-## 🛠️ Tech Stack
-
-- **Frontend**: React 18, TypeScript, Vite
-- **Styling**: Tailwind CSS, Shadcn UI
-- **AI**: OpenAI GPT API (real implementation)
-- **Web Crawling**: Playwright backend integration
-- **Database**: Supabase (real implementation)
-- **Icons**: Lucide React
-
-## 📁 Project Structure
-
-```
-src/
-├── components/
-│   └── ui/
-│       ├── glass-card.tsx      # Main 3D glass card component
-│       └── ...                 # Other UI components
-├── lib/
-│   ├── openai.ts              # OpenAI API configuration
-│   ├── supabase.ts            # Supabase client
-│   ├── crawler.ts             # Web crawling logic
-│   └── utils.ts               # Utility functions
-├── pages/
-│   └── Index.tsx              # Main page component
-└── assets/
-    └── spider.png             # Spider logo
+# Install Playwright browsers
+npx playwright install chromium
 ```
 
-## 🎨 Components
+### **Development**
+```bash
+# Start backend (port 3001)
+cd backend
+npm run dev
 
-### GlassCard Component
-
-The main component featuring:
-- 3D hover animations
-- Integrated chat interface
-- Message history display
-- Input handling with keyboard shortcuts
-
-```tsx
-<GlassCard 
-  onSendMessage={handleSendMessage}
-  messages={messages}
-  isLoading={isLoading}
-/>
+# Start frontend (auto-detects available port)
+cd ..
+npm run dev
 ```
 
-## 🔧 Configuration
+### **Usage**
+```jsx
+import { SimplePreviewTooltip } from './components/SimplePreviewTooltip';
 
-### OpenAI Setup
+<SimplePreviewTooltip
+  targetUrl="http://localhost:8084"
+  elementId="get-started-button"
+>
+  <button>Get Started</button>
+</SimplePreviewTooltip>
+```
 
-1. Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
-2. Add it to your `.env` file as `VITE_OPENAI_API_KEY`
+## 🎯 Key Features
 
-### Supabase Setup (Optional)
+- ✅ **Proactive Scraping**: Automatically captures all button interactions
+- ✅ **Local Storage Caching**: Fast tooltip display with persistent storage
+- ✅ **Full Page Screenshots**: Complete "after" state visualization
+- ✅ **Base64 Storage**: No backend file storage, browser-native caching
+- ✅ **Dynamic Element Detection**: Works with any clickable element
+- ✅ **Compressed Images**: Optimized for Local Storage size limits
 
-1. Create a new project at [Supabase](https://supabase.com)
-2. Get your project URL and anon key
-3. Add them to your `.env` file
+## 🔍 Debugging
 
-### Playwright Setup
+### **Check Local Storage**
+1. Open Developer Tools (F12)
+2. Go to Application tab
+3. Expand Local Storage → `http://localhost:8084`
+4. Look for keys starting with `preview_`
 
-Playwright is automatically configured for web crawling. The crawler supports:
-- Search query processing
-- Multi-page crawling
-- Content extraction and analysis
-- Data storage and retrieval
+### **Backend Logs**
+```bash
+cd backend
+npm run dev
+# Watch for "Starting after capture" and "Capture completed" messages
+```
 
-## 🚀 Deployment
+### **Common Issues**
+- **"Scraping failed: Failed to fetch"**: Backend not running or wrong port
+- **No tooltips showing**: Check Local Storage for cached data
+- **Old screenshots**: Clear Local Storage and refresh page
 
-### Vercel (Recommended)
+## 📝 Notes
 
-1. Connect your GitHub repository to Vercel
-2. Add environment variables in Vercel dashboard
-3. Deploy automatically on push to main
+- **One-time scraping**: Page is scraped once on load, not on each hover
+- **Port management**: Frontend may change ports (8082, 8083, 8084) - backend adapts
+- **Element identification**: Uses element IDs and selectors for matching
+- **Error handling**: Graceful fallbacks for failed captures
 
-### Netlify
+## ⚠️ Current Status (Latest Update)
 
-1. Connect your GitHub repository to Netlify
-2. Add environment variables in Netlify dashboard
-3. Deploy automatically on push to main
+**System Status**: ✅ **WORKING** - Core functionality operational with some limitations
 
-## 🤝 Contributing
+### ✅ **What's Working:**
+- **Local Button Screenshots**: All local buttons (Get Started, Settings, etc.) capture and display correctly
+- **Local Storage Caching**: Screenshots stored as base64 in browser Local Storage
+- **Instant Tooltips**: Hover over buttons shows cached screenshots immediately
+- **Rate Limiting Fixed**: Reduced from 2s to 0.1s between requests
+- **Port Auto-Detection**: Frontend automatically finds available port (currently 8091)
+- **Backend Stability**: No more infinite loops or stuck processing states
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### ❌ **What's Not Working:**
+- **External URL Screenshots**: GitHub documentation button doesn't capture external page screenshots
+- **Target="_blank" Links**: External links with `target="_blank"` not properly detected
+- **External Navigation**: Playwright doesn't navigate to external URLs correctly
 
-## 📝 License
+### 🔧 **Recent Fixes Applied:**
+- ✅ Fixed aggressive rate limiting (2000ms → 100ms)
+- ✅ Added external URL detection logic for `target="_blank"` links
+- ✅ Implemented direct navigation instead of clicking external links
+- ✅ Added debugging logs for external URL capture
+- ✅ Cleared stuck processing states and global capturing flags
+- ✅ Auto port detection for frontend (no more port conflicts)
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Shadcn UI](https://ui.shadcn.com/) for beautiful components
-- [Tailwind CSS](https://tailwindcss.com/) for styling
-- [OpenAI](https://openai.com/) for AI capabilities
-- [Playwright](https://playwright.dev/) for web automation
-- [Supabase](https://supabase.com/) for backend services
-
-## 📞 Support
-
-If you have any questions or need help, please:
-- Open an issue on GitHub
-- Check the documentation
-- Contact the maintainers
+### 🎯 **Next Priority:**
+- Fix external URL screenshot capture for GitHub documentation button
+- Test and verify external navigation works correctly
+- Clean up unused components and dead code
 
 ---
 
-Made with ❤️ by [mcpmessenger](https://github.com/mcpmessenger)
+**ToolTip Companion v1.0** - Making web interactions more intuitive with proactive visual feedback.

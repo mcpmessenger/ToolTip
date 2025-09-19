@@ -83,6 +83,7 @@ export interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   isLoading?: boolean;
   onFileUpload?: (file: File) => void;
   onSearchClick?: () => void;
+  onClose?: () => void;
   // Proactive scraping props
   targetUrl?: string;
   enableProactiveMode?: boolean;
@@ -100,6 +101,7 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
     isLoading = false, 
     onFileUpload, 
     onSearchClick,
+    onClose,
     targetUrl = window.location.href,
     enableProactiveMode = true,
     apiBaseUrl = 'http://localhost:3001',
@@ -147,42 +149,46 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
       try {
         onScrapingStart?.(targetUrl);
 
-        const response = await fetch(`${apiBaseUrl}/api/proactive-scrape`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ url: targetUrl })
-        });
+        // DISABLED - using simpleAfterCapture instead
+        // const response = await fetch(`${apiBaseUrl}/api/proactive-scrape`, {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({ url: targetUrl })
+        // });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to start proactive scraping');
-        }
+        // DISABLED - using simpleAfterCapture instead
+        // if (!response.ok) {
+        //   const errorData = await response.json();
+        //   throw new Error(errorData.message || 'Failed to start proactive scraping');
+        // }
 
-        const data = await response.json();
-        setScrapingResults(data.data);
-        onScrapingComplete?.(data.data);
+        // DISABLED - using simpleAfterCapture instead
+        // const data = await response.json();
+        // setScrapingResults(data.data);
+        // onScrapingComplete?.(data.data);
 
+        // DISABLED - using simpleAfterCapture instead
         // Preload preview images
-        if (data.data.elements) {
-          const previewPromises = data.data.elements
-            .filter(el => el.previewId)
-            .map(async (el) => {
-              try {
-                const previewResponse = await fetch(`${apiBaseUrl}/api/proactive-scrape/element-preview/${el.previewId}`);
-                if (previewResponse.ok) {
-                  const blob = await previewResponse.blob();
-                  const previewUrl = URL.createObjectURL(blob);
-                  setPreviewCache(prev => new Map(prev).set(el.id, previewUrl));
-                }
-              } catch (err) {
-                console.warn(`Failed to load preview for element ${el.id}:`, err);
-              }
-            });
+        // if (data.data.elements) {
+        //   const previewPromises = data.data.elements
+        //     .filter(el => el.previewId)
+        //     .map(async (el) => {
+        //       try {
+        //         const previewResponse = await fetch(`${apiBaseUrl}/api/proactive-scrape/element-preview/${el.previewId}`);
+        //         if (previewResponse.ok) {
+        //           const blob = await previewResponse.blob();
+        //           const previewUrl = URL.createObjectURL(blob);
+        //           setPreviewCache(prev => new Map(prev).set(el.id, previewUrl));
+        //         }
+        //       } catch (err) {
+        //         console.warn(`Failed to load preview for element ${el.id}:`, err);
+        //       }
+        //     });
 
-          await Promise.all(previewPromises);
-        }
+        //   await Promise.all(previewPromises);
+        // }
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -240,6 +246,67 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
     const handleSendMessage = () => {
       if (inputValue.trim() && onSendMessage) {
         onSendMessage(inputValue.trim());
+        setInputValue('');
+      }
+    };
+
+    const handleFreshCrawl = async () => {
+      if (!inputValue.trim()) return;
+      
+      const url = inputValue.trim();
+        // setIsLoading(true); // DISABLED
+      
+      try {
+        // Add message to show we're starting fresh crawl
+        const freshCrawlMessage: Message = {
+          id: Date.now().toString(),
+          type: 'ai',
+          content: `🔄 Starting fresh crawl of ${url}...`,
+          timestamp: new Date()
+        };
+        // setMessages(prev => [...prev, freshCrawlMessage]); // DISABLED
+        
+        // DISABLED - using simpleAfterCapture instead
+        // Trigger proactive scraping for the URL
+        // const response = await fetch('http://localhost:3001/api/proactive-scrape', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({ url }),
+        // });
+
+        // DISABLED - using simpleAfterCapture instead
+        // if (!response.ok) {
+        //   throw new Error(`Failed to start fresh crawl: ${response.statusText}`);
+        // }
+
+        // DISABLED - using simpleAfterCapture instead
+        // const data = await response.json();
+        // 
+        // if (data.success) {
+        //   const successMessage: Message = {
+        //     id: (Date.now() + 1).toString(),
+        //     type: 'ai',
+        //     content: `✅ Fresh crawl completed! Found ${data.data.successfulPreviews}/${data.data.totalElements} clickable elements. Hover over any element to see instant previews!`,
+        //     timestamp: new Date()
+        //   };
+        //   setMessages(prev => [...prev, successMessage]);
+        // } else {
+        //   throw new Error(data.message || 'Fresh crawl failed');
+        // }
+        
+      } catch (error) {
+        console.error('Fresh crawl error:', error);
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'ai',
+          content: `❌ Fresh crawl failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          timestamp: new Date()
+        };
+        // setMessages(prev => [...prev, errorMessage]); // DISABLED
+      } finally {
+        // setIsLoading(false); // DISABLED
         setInputValue('');
       }
     };
@@ -521,13 +588,24 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
               >
                 <input 
                   type="text" 
-                  placeholder={isProactiveMode ? "Proactive mode - Enter URL to scrape..." : "Fresh crawl - Enter URL or drag & drop a file..."}
+                  placeholder={isProactiveMode ? "Proactive mode - Enter URL to scrape..." : "Enter URL for fresh crawl or drag & drop a file..."}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
                   className="flex-1 bg-transparent text-white text-sm placeholder:text-zinc-300 border-none outline-none relative z-30 text-left"
                   style={{ textAlign: 'left' }}
                 />
+                
+                {/* Fresh Crawl Button - Always visible */}
+                <button 
+                  onClick={handleFreshCrawl}
+                  disabled={!inputValue.trim() || isLoading}
+                  className="p-1 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative z-30"
+                  title="Fresh Crawl - Crawl any page for instant tooltips"
+                >
+                  <RefreshCw className="h-4 w-4 text-white" />
+                </button>
+                
                 {isProactiveMode ? (
                   <button 
                     onClick={startProactiveScraping}
@@ -602,6 +680,15 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
                 <img src={spiderImage} alt="Spider" className="w-12 h-12" />
               </div>
             </div>
+            
+            {/* Close Button - Bottom Left */}
+            <button
+              onClick={onClose}
+              className="absolute bottom-4 left-4 p-2 hover:bg-white/20 rounded-full transition-colors z-50"
+              title="Close Tooltip Companion"
+            >
+              <X className="h-4 w-4 text-white" />
+            </button>
           </div>
         </div>
       </div>

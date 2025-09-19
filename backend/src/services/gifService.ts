@@ -101,49 +101,89 @@ export class GifService {
 
         // Find and interact with the target element using a robust sequence
         let element = null;
+        let elementFound = false;
 
+        // Try to find element by selector first
         if (request.element_selector) {
-          element = await page.$(request.element_selector);
-        } else if (request.element_text) {
-          element = await page.locator(`text=${request.element_text}`).first();
+          try {
+            element = await page.$(request.element_selector);
+            if (element) {
+              console.log(`Crawl ${crawlId}: Found element by selector: ${request.element_selector}`);
+              elementFound = true;
+            }
+          } catch (e) {
+            console.warn(`Crawl ${crawlId}: Failed to find element by selector:`, e);
+          }
         }
 
-        if (request.coordinates && !element) {
-          // Click at specific coordinates if no selector/text was found
-          await page.mouse.move(request.coordinates[0], request.coordinates[1]);
-          await page.mouse.down();
-          await page.mouse.up();
+        // Try to find element by text if selector didn't work
+        if (!elementFound && request.element_text) {
+          try {
+            const textElements = await page.$$('*');
+            for (const el of textElements) {
+              const text = await el.textContent();
+              if (text && text.trim().includes(request.element_text.trim())) {
+                element = el;
+                console.log(`Crawl ${crawlId}: Found element by text: "${request.element_text}"`);
+                elementFound = true;
+                break;
+              }
+            }
+          } catch (e) {
+            console.warn(`Crawl ${crawlId}: Failed to find element by text:`, e);
+          }
         }
 
-        if (element) {
+        // If we found an element, interact with it
+        if (element && elementFound) {
           try {
             // Scroll into view and focus
-            await element.scrollIntoViewIfNeeded().catch(() => {});
-            await element.focus().catch(() => {});
-
-            // If bounding box available, move mouse there and perform mouse sequence
+            await element.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(500); // Wait for scroll to complete
+            
+            // Get bounding box and click at center
             const box = await element.boundingBox();
             if (box) {
               const cx = box.x + box.width / 2;
               const cy = box.y + box.height / 2;
-              await page.mouse.move(cx, cy, { steps: 6 }).catch(() => {});
-              // Fire pointer/mouse sequence
-              await page.mouse.down().catch(() => {});
-              await page.mouse.up().catch(() => {});
+              
+              console.log(`Crawl ${crawlId}: Clicking element at coordinates: ${cx}, ${cy}`);
+              
+              // Move mouse to element and click
+              await page.mouse.move(cx, cy, { steps: 10 });
+              await page.waitForTimeout(200);
+              await page.mouse.down();
+              await page.waitForTimeout(100);
+              await page.mouse.up();
+              
+              // Also try synthetic click events
+              await page.evaluate((el) => {
+                if (el) {
+                  // Create and dispatch click event
+                  const clickEvent = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                    clientX: el.getBoundingClientRect().left + el.getBoundingClientRect().width / 2,
+                    clientY: el.getBoundingClientRect().top + el.getBoundingClientRect().height / 2
+                  });
+                  el.dispatchEvent(clickEvent);
+                }
+              }, element);
             }
-
-            // Also dispatch synthetic pointer/mouse events in page context as a fallback
-            await page.evaluate((sel) => {
-              if (!sel) return;
-              const el = document.querySelector(String(sel)) as HTMLElement | null;
-              if (!el) return;
-              ['pointerdown', 'mousedown', 'mouseup', 'click'].forEach(evt => {
-                el.dispatchEvent(new MouseEvent(evt, { bubbles: true, cancelable: true }));
-              });
-            }, request.element_selector).catch(() => {});
           } catch (e) {
-            console.warn('Robust interaction failed:', e);
+            console.warn(`Crawl ${crawlId}: Element interaction failed:`, e);
           }
+        } else if (request.coordinates) {
+          // Fallback to coordinate clicking
+          console.log(`Crawl ${crawlId}: Clicking at coordinates: ${request.coordinates[0]}, ${request.coordinates[1]}`);
+          await page.mouse.move(request.coordinates[0], request.coordinates[1]);
+          await page.waitForTimeout(200);
+          await page.mouse.down();
+          await page.waitForTimeout(100);
+          await page.mouse.up();
+        } else {
+          console.warn(`Crawl ${crawlId}: No element found and no coordinates provided`);
         }
 
         // Wait for the page to respond
