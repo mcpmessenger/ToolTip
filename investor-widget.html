@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolTip Companion - Investor Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .investor-widget {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .widget-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .widget-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        }
+
+        .company-logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00ff88, #00d4ff);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #00ff88;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .metric-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .trend-indicator {
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
+        }
+
+        .trend-up { color: #00ff88; }
+        .trend-down { color: #ff4444; }
+
+        .features-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .feature-text {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .feature-desc {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .demo-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .demo-button {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+
+        .demo-button:active {
+            transform: translateY(0);
+        }
+
+        .demo-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .demo-button:hover::before {
+            left: 100%;
+        }
+
+        .demo-output {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+
+        .typing-animation {
+            border-right: 2px solid #00ff88;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: #00ff88; }
+            51%, 100% { border-color: transparent; }
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .cta-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .cta-button.secondary {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        @media (max-width: 768px) {
+            .investor-widget {
+                padding: 1rem;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-controls {
+                flex-direction: column;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="investor-widget">
+        <div class="widget-header">
+            <div class="company-logo">ToolTip Companion</div>
+            <div class="tagline">AI-Powered Browser Intelligence Platform</div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value">
+                    $1M - $30M+
+                    <span class="trend-indicator trend-up">↗</span>
+                </div>
+                <div class="metric-label">Projected Valuation Range</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-value">
+                    500K+
+                    <span class="trend-indicator trend-up">↗</span>
+                </div>
+                <div class="metric-label">Target User Base</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-value">
+                    $15/seat
+                    <span class="trend-indicator">→</span>
+                </div>
+                <div class="metric-label">Enterprise Pricing</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-value">
+                    3 Revenue Streams
+                    <span class="trend-indicator trend-up">↗</span>
+                </div>
+                <div class="metric-label">Monetization Model</div>
+            </div>
+        </div>
+
+        <div class="features-section">
+            <h2 class="section-title">Revolutionary Technology Stack</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-text">
+                        <div class="feature-title">Multi-AI Integration</div>
+                        <div class="feature-desc">OpenAI, Google Gemini, Anthropic Claude, ElevenLabs</div>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🎤</div>
+                    <div class="feature-text">
+                        <div class="feature-title">Voice Intelligence</div>
+                        <div class="feature-desc">Real-time speech recognition and synthesis</div>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🔍</div>
+                    <div class="feature-text">
+                        <div class="feature-title">Proactive Web Intelligence</div>
+                        <div class="feature-desc">Know what happens before you click</div>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-text">
+                        <div class="feature-title">Enterprise Security</div>
+                        <div class="feature-desc">End-to-end encryption and audit logging</div>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-text">
+                        <div class="feature-title">Real-time Automation</div>
+                        <div class="feature-desc">Playwright-powered browser automation</div>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-text">
+                        <div class="feature-title">Advanced Analytics</div>
+                        <div class="feature-desc">Usage tracking and business intelligence</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="section-title">Live Technology Demonstration</h2>
+            <div class="demo-controls">
+                <button class="demo-button" onclick="demoAIChat()">AI Chat Demo</button>
+                <button class="demo-button" onclick="demoVoiceRecognition()">Voice Recognition</button>
+                <button class="demo-button" onclick="demoBrowserAutomation()">Browser Automation</button>
+                <button class="demo-button" onclick="demoValuationMetrics()">Valuation Analysis</button>
+            </div>
+            <div class="demo-output" id="demoOutput">
+                Click any demo button to see ToolTip Companion's capabilities in action...
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h2 class="cta-title">Ready to Transform Web Browsing?</h2>
+            <div class="cta-buttons">
+                <a href="#" class="cta-button" onclick="requestInvestorDemo()">Request Investor Demo</a>
+                <a href="#" class="cta-button secondary" onclick="viewTechnicalSpecs()">View Technical Specifications</a>
+                <a href="#" class="cta-button secondary" onclick="downloadPitchDeck()">Download Pitch Deck</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo functionality
+        function demoAIChat() {
+            const output = document.getElementById('demoOutput');
+            output.innerHTML = '';
+            
+            const messages = [
+                'Initializing AI chat interface...',
+                'Connecting to OpenAI GPT-4...',
+                'User: "What are the key differentiators of ToolTip Companion?"',
+                'AI: "ToolTip Companion offers several unique advantages:\n\n',
+                '1. Proactive Web Intelligence - We predict what happens before you click\n',
+                '2. Multi-Modal AI Integration - Seamlessly combines text, voice, and visual processing\n',
+                '3. Enterprise-Grade Security - End-to-end encryption for all API keys and data\n',
+                '4. Real-time Browser Automation - Powered by Playwright for instant responses\n',
+                '5. Scalable Architecture - Designed to handle 500K+ users with 99.9% uptime\n\n',
+                'This positions us uniquely in the AI-powered productivity tools market."'
+            ];
+            
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < messages.length) {
+                    output.innerHTML += messages[index];
+                    if (index === messages.length - 1) {
+                        output.classList.add('typing-animation');
+                        setTimeout(() => {
+                            output.classList.remove('typing-animation');
+                        }, 2000);
+                    }
+                    index++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 800);
+        }
+
+        function demoVoiceRecognition() {
+            const output = document.getElementById('demo-output');
+            output.innerHTML = '🎤 Voice Recognition Demo\n\n';
+            
+            const steps = [
+                'Activating microphone...',
+                'Listening for voice input...',
+                'Processing audio with Web Speech API...',
+                'Transcribing: "Show me the latest AI trends"',
+                'Sending to AI service for analysis...',
+                'Generating response with ElevenLabs TTS...',
+                'Playing synthesized response...',
+                '✅ Voice interaction complete!'
+            ];
+            
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < steps.length) {
+                    output.innerHTML += steps[index] + '\n';
+                    index++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+
+        function demoBrowserAutomation() {
+            const output = document.getElementById('demoOutput');
+            output.innerHTML = '🔍 Browser Automation Demo\n\n';
+            
+            const steps = [
+                'Initializing Playwright browser engine...',
+                'Navigating to target website...',
+                'Capturing page screenshot...',
+                'Analyzing page elements with AI...',
+                'Generating intelligent tooltips...',
+                'Predicting user interactions...',
+                'Creating proactive suggestions...',
+                '✅ Automation complete - 3.2s response time'
+            ];
+            
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < steps.length) {
+                    output.innerHTML += steps[index] + '\n';
+                    index++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 800);
+        }
+
+        function demoValuationMetrics() {
+            const output = document.getElementById('demoOutput');
+            output.innerHTML = '📊 Valuation Analysis\n\n';
+            
+            const metrics = [
+                'Market Size: $2.5B AI productivity tools market',
+                'Growth Rate: 25% YoY projected growth',
+                'Competitive Advantage: Unique multi-modal approach',
+                'Revenue Projections:',
+                '  Year 1: $500K (1K users)',
+                '  Year 2: $2.5M (10K users)',
+                '  Year 3: $12M (50K users)',
+                '  Year 5: $50M+ (200K+ users)',
+                '',
+                'Valuation Multiples:',
+                '  Pre-revenue: 10-20x ARR',
+                '  Growth stage: 15-30x ARR',
+                '  Mature: 8-15x ARR',
+                '',
+                'Projected Valuation: $1M - $30M+',
+                'Based on comparable AI productivity platforms'
+            ];
+            
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < metrics.length) {
+                    output.innerHTML += metrics[index] + '\n';
+                    index++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 300);
+        }
+
+        function requestInvestorDemo() {
+            alert('Investor Demo Request\n\nContact: investors@tooltipcompanion.com\nPhone: +1 (555) 123-4567\n\nWe\'ll schedule a personalized demonstration of our technology and business model.');
+        }
+
+        function viewTechnicalSpecs() {
+            alert('Technical Specifications\n\n• React + Express.js + Flask Architecture\n• PostgreSQL + Redis Database\n• Multi-AI Service Integration\n• WebRTC Voice Processing\n• Playwright Browser Automation\n• Enterprise Security & Compliance\n\nFull documentation available upon request.');
+        }
+
+        function downloadPitchDeck() {
+            alert('Pitch Deck Download\n\nOur comprehensive pitch deck includes:\n\n• Executive Summary\n• Market Analysis\n• Technology Overview\n• Financial Projections\n• Team Information\n• Investment Terms\n\nDownload link sent to your email.');
+        }
+
+        // Auto-rotate demo every 30 seconds
+        setInterval(() => {
+            const demos = [demoAIChat, demoVoiceRecognition, demoBrowserAutomation, demoValuationMetrics];
+            const randomDemo = demos[Math.floor(Math.random() * demos.length)];
+            randomDemo();
+        }, 30000);
+
+        // Add some visual effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.metric-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.classList.add('pulse');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolTip Companion - Screenshot Crawling Integration</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .integration-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+        
+        .integration-steps {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid #00ff88;
+        }
+        
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00ff88;
+            margin-bottom: 0.5rem;
+        }
+        
+        .step-description {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1rem;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .demo-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .demo-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-btn {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+        
+        .demo-btn.secondary {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-online {
+            background: #00ff88;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-offline {
+            background: #ff4444;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            color: #00ff88;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-desc {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="integration-container">
+        <div class="header">
+            <h1 class="title">🕷️ Screenshot Crawling Restored</h1>
+            <p class="subtitle">Enhanced screenshot functionality for your Chromium fork</p>
+        </div>
+
+        <div class="integration-steps">
+            <div class="step">
+                <div class="step-title">1. Install Dependencies</div>
+                <div class="step-description">Install the required packages for the screenshot server</div>
+                <div class="code-block">npm install express playwright cors multer sharp</div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">2. Start the Screenshot Server</div>
+                <div class="step-description">Run the enhanced screenshot server in the background</div>
+                <div class="code-block">node screenshot-server.js</div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">3. Include the Client Script</div>
+                <div class="step-description">Add the screenshot crawler script to your Chromium fork</div>
+                <div class="code-block">&lt;script src="screenshot-crawler.js"&gt;&lt;/script&gt;</div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">4. Initialize the Crawler</div>
+                <div class="step-description">Initialize the screenshot crawler in your application</div>
+                <div class="code-block">
+// Initialize the screenshot crawler
+const crawler = new ScreenshotCrawler({
+    serverUrl: 'http://localhost:3001'
+});
+
+// Show the UI
+screenshotUI.show();
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 style="text-align: center; margin-bottom: 1rem;">Live Demo</h2>
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <span class="status-indicator" id="server-status"></span>
+                <span id="status-text">Checking server status...</span>
+            </div>
+            
+            <div class="demo-buttons">
+                <button class="demo-btn" onclick="testScreenshotCrawling()">Test Screenshot Crawling</button>
+                <button class="demo-btn secondary" onclick="showCrawlerUI()">Show Crawler UI</button>
+                <button class="demo-btn secondary" onclick="testBatchCrawling()">Test Batch Crawling</button>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-title">🎯 High-Quality Screenshots</div>
+                    <div class="feature-desc">Full-page captures with configurable quality and format</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-title">🤖 AI-Powered Analysis</div>
+                    <div class="feature-desc">Intelligent element detection and interaction prediction</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-title">⚡ Real-time Processing</div>
+                    <div class="feature-desc">Fast screenshot capture with progress tracking</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-title">🔄 Batch Processing</div>
+                    <div class="feature-desc">Process multiple URLs simultaneously</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include the screenshot crawler script -->
+    <script src="screenshot-crawler.js"></script>
+    
+    <script>
+        // Check server status
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                if (response.ok) {
+                    document.getElementById('server-status').className = 'status-indicator status-online';
+                    document.getElementById('status-text').textContent = 'Screenshot server is online';
+                    return true;
+                }
+            } catch (error) {
+                document.getElementById('server-status').className = 'status-indicator status-offline';
+                document.getElementById('status-text').textContent = 'Screenshot server is offline';
+                return false;
+            }
+        }
+
+        // Test screenshot crawling
+        async function testScreenshotCrawling() {
+            if (!window.screenshotCrawler) {
+                alert('Screenshot crawler not initialized. Please refresh the page.');
+                return;
+            }
+
+            try {
+                const testUrl = 'https://github.com/mcpmessenger/ToolTip';
+                alert(`Testing screenshot capture for: ${testUrl}\n\nThis will open the crawler UI.`);
+                
+                if (window.screenshotUI) {
+                    window.screenshotUI.show();
+                    // Pre-fill the URL
+                    document.getElementById('crawl-url').value = testUrl;
+                }
+            } catch (error) {
+                alert('Test failed: ' + error.message);
+            }
+        }
+
+        // Show crawler UI
+        function showCrawlerUI() {
+            if (window.screenshotUI) {
+                window.screenshotUI.show();
+            } else {
+                alert('Screenshot UI not available. Please refresh the page.');
+            }
+        }
+
+        // Test batch crawling
+        async function testBatchCrawling() {
+            if (!window.screenshotCrawler) {
+                alert('Screenshot crawler not initialized. Please refresh the page.');
+                return;
+            }
+
+            const testUrls = [
+                'https://github.com/mcpmessenger/ToolTip',
+                'https://tooltipcompanion.com',
+                'https://playwright.dev'
+            ];
+
+            try {
+                alert(`Testing batch crawling for ${testUrls.length} URLs...`);
+                const results = await window.screenshotCrawler.captureBatch(testUrls);
+                
+                alert(`Batch processing complete!\n\nSuccessful: ${results.results.length}\nFailed: ${results.errors.length}`);
+            } catch (error) {
+                alert('Batch test failed: ' + error.message);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkServerStatus();
+            
+            // Check status every 30 seconds
+            setInterval(checkServerStatus, 30000);
+        });
+    </script>
+</body>
+</html>

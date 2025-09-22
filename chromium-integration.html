@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolTip Companion - Chromium Fork Integration</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .demo-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .demo-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-description {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+        
+        .integration-steps {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #00ff88;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #00ff88;
+        }
+        
+        .step-code {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .demo-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .demo-btn {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+        
+        .demo-btn.secondary {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.9);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-content">
+        <div class="demo-header">
+            <h1 class="demo-title">ToolTip Companion</h1>
+            <p class="demo-description">Investor Widget Integration for Chromium Fork</p>
+        </div>
+
+        <div class="integration-steps">
+            <h2 style="color: white; margin-bottom: 1rem;">Integration Steps</h2>
+            
+            <div class="step">
+                <div class="step-title">1. Include the Widget Script</div>
+                <p>Add the investor widget script to your Chromium fork's main page:</p>
+                <div class="step-code">
+&lt;script src="chromium-widget.js"&gt;&lt;/script&gt;
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">2. Initialize the Widget</div>
+                <p>Initialize the widget in your Chromium fork's JavaScript:</p>
+                <div class="step-code">
+// Initialize the investor widget
+const widget = new ToolTipInvestorWidget('widget-container');
+
+// Show the widget (can be triggered by user action)
+widget.show();
+
+// Hide the widget
+widget.hide();
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">3. Customize for Your Fork</div>
+                <p>Modify the widget content to match your specific Chromium fork features:</p>
+                <div class="step-code">
+// Customize metrics
+const customMetrics = {
+    valuation: '$2M-$50M+',
+    users: '1M+',
+    price: '$20/seat'
+};
+
+// Update widget with custom data
+widget.updateMetrics(customMetrics);
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">4. Add to Browser UI</div>
+                <p>Integrate the widget into your browser's UI (toolbar, sidebar, or popup):</p>
+                <div class="step-code">
+// Add to browser toolbar
+const toolbar = document.getElementById('browser-toolbar');
+const widgetButton = document.createElement('button');
+widgetButton.textContent = 'Investor Info';
+widgetButton.onclick = () => widget.show();
+toolbar.appendChild(widgetButton);
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-buttons">
+            <button class="demo-btn" onclick="showWidget()">Show Investor Widget</button>
+            <button class="demo-btn secondary" onclick="hideWidget()">Hide Widget</button>
+            <button class="demo-btn secondary" onclick="demoFeatures()">Demo Features</button>
+        </div>
+    </div>
+
+    <!-- Include the widget script -->
+    <script src="chromium-widget.js"></script>
+    
+    <script>
+        function showWidget() {
+            if (window.ttWidget) {
+                ttWidget.show();
+            } else {
+                alert('Widget not initialized. Please refresh the page.');
+            }
+        }
+        
+        function hideWidget() {
+            if (window.ttWidget) {
+                ttWidget.hide();
+            }
+        }
+        
+        function demoFeatures() {
+            if (window.ttWidget) {
+                ttWidget.demoAI();
+                setTimeout(() => ttWidget.demoVoice(), 3000);
+                setTimeout(() => ttWidget.demoAutomation(), 6000);
+            }
+        }
+        
+        // Auto-show widget after page load
+        setTimeout(() => {
+            if (window.ttWidget) {
+                ttWidget.show();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
