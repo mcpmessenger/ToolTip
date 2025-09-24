@@ -60,6 +60,7 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [previewData, setPreviewData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout>();
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -68,8 +69,28 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
 
     setIsLoading(true);
     setError(null);
+    setHasAttemptedFetch(true);
 
     try {
+      // First check if we have cached data
+      const cacheKey = `preview_${window.location.href}_${elementId}`;
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        try {
+          const parsedCache = JSON.parse(cachedData);
+          if (parsedCache && parsedCache.afterScreenshot) {
+            console.log(`✅ Found cached preview data for ${elementId}`);
+            setPreviewData(parsedCache);
+            setIsLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.log(`⚠️ Invalid cached data for ${elementId}, clearing cache`);
+          localStorage.removeItem(cacheKey);
+        }
+      }
+
+      // If no cached data, check proactive results
       const proactiveResults = localStorage.getItem('proactive_scrape_results');
       if (proactiveResults) {
         const results = JSON.parse(proactiveResults);
@@ -88,7 +109,6 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
             timestamp: elementResult.timestamp
           };
           setPreviewData(newPreviewData);
-          const cacheKey = `preview_${window.location.href}_${elementId}`;
           localStorage.setItem(cacheKey, JSON.stringify(newPreviewData));
         } else {
           // No valid data found, show spider loader instead of error
@@ -187,16 +207,34 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
     localStorage.removeItem(cacheKey);
     setPreviewData(null);
     setError(null);
+    setHasAttemptedFetch(false);
     fetchPreview();
   };
 
   useEffect(() => {
+    // Check for cached data on mount
+    const cacheKey = `preview_${window.location.href}_${elementId}`;
+    const cachedData = localStorage.getItem(cacheKey);
+    if (cachedData) {
+      try {
+        const parsedCache = JSON.parse(cachedData);
+        if (parsedCache && parsedCache.afterScreenshot) {
+          console.log(`✅ Found cached preview data on mount for ${elementId}`);
+          setPreviewData(parsedCache);
+          setHasAttemptedFetch(true);
+        }
+      } catch (e) {
+        console.log(`⚠️ Invalid cached data on mount for ${elementId}, clearing cache`);
+        localStorage.removeItem(cacheKey);
+      }
+    }
+
     return () => {
       if (hoverTimeoutRef.current) {
         clearTimeout(hoverTimeoutRef.current);
       }
     };
-  }, []);
+  }, [elementId]);
 
   return (
     <div 
@@ -300,7 +338,7 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
           )}
           
           {/* Initial State - Full Screen Spider Video Loader for external links */}
-          {!isLoading && !previewData && !error && (
+          {!isLoading && !previewData && !error && !hasAttemptedFetch && (
             <SpiderVideoLoader 
               fullScreen={true}
               text={targetUrl.includes('github.com') ? "Crawling GitHub..." : "Crawling external link..."} 
