@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { SpiderVideoLoader } from './SpiderVideoLoader';
 
 interface SimplePreviewTooltipProps {
   children: React.ReactNode;
@@ -68,12 +69,12 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
     setIsLoading(true);
     setError(null);
 
-    const proactiveResults = localStorage.getItem('proactive_scrape_results');
-    if (proactiveResults) {
-      try {
+    try {
+      const proactiveResults = localStorage.getItem('proactive_scrape_results');
+      if (proactiveResults) {
         const results = JSON.parse(proactiveResults);
         const elementResult = results.find((r: any) => r.elementId === elementId);
-        if (elementResult && elementResult.success) {
+        if (elementResult && elementResult.success && elementResult.afterScreenshot) {
           console.log(`✅ Found proactive scrape result for ${elementId}:`, elementResult);
           const newPreviewData = {
             type: 'after-screenshot',
@@ -90,13 +91,21 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
           const cacheKey = `preview_${window.location.href}_${elementId}`;
           localStorage.setItem(cacheKey, JSON.stringify(newPreviewData));
         } else {
-          setError('No preview available');
+          // No valid data found, show spider loader instead of error
+          console.log(`⚠️ No valid preview data for ${elementId}, showing spider loader`);
+          setPreviewData(null);
+          setError(null);
         }
-      } catch (e) {
-        setError('Parse error');
+      } else {
+        // No proactive results, show spider loader
+        console.log(`⚠️ No proactive results found, showing spider loader`);
+        setPreviewData(null);
+        setError(null);
       }
-    } else {
-      setError('No data');
+    } catch (e) {
+      console.error(`❌ Error fetching preview for ${elementId}:`, e);
+      setError(null); // Don't show error, show spider loader instead
+      setPreviewData(null);
     }
 
     setIsLoading(false);
@@ -173,6 +182,14 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
     }
   };
 
+  const clearCache = () => {
+    const cacheKey = `preview_${window.location.href}_${elementId}`;
+    localStorage.removeItem(cacheKey);
+    setPreviewData(null);
+    setError(null);
+    fetchPreview();
+  };
+
   useEffect(() => {
     return () => {
       if (hoverTimeoutRef.current) {
@@ -204,22 +221,29 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
             maxHeight: '60vh'
           }}
         >
-          {/* Loading State */}
+          {/* Loading State - Full Screen Spider Video Loader */}
           {isLoading && (
-            <div className="h-full flex items-center justify-center bg-gray-50">
-              <div className="relative">
-                {/* Simple loading spinner */}
-                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
-              </div>
-            </div>
+            <SpiderVideoLoader 
+              fullScreen={true}
+              text={targetUrl.includes('github.com') ? "Crawling GitHub..." : "Crawling page..."} 
+              showText={true}
+            />
           )}
           
-          {/* Error State */}
+          {/* Error State - Full Screen Spider Video Loader */}
           {error && (
-            <div className="h-full flex items-center justify-center bg-gray-100">
-              <div className="w-16 h-16 border-4 border-gray-300 rounded-full flex items-center justify-center">
-                <div className="w-8 h-8 bg-gray-400 rounded-full"></div>
-              </div>
+            <div className="relative h-full">
+              <SpiderVideoLoader 
+                fullScreen={true}
+                text="Retrying..." 
+                showText={true}
+              />
+              <button
+                onClick={clearCache}
+                className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded-md transition-colors"
+              >
+                Refresh
+              </button>
             </div>
           )}
           
@@ -242,47 +266,46 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
                     </p>
                   </div>
                 </div>
-      ) : previewData.type === 'after-screenshot' ? (
-        // Show after screenshot - PURELY VISUAL
-        <div className="h-full relative">
-          {previewData.afterScreenshot ? (
-            <div className="h-full">
-              <img 
-                src={previewData.afterScreenshot}
-                alt="Preview"
-                className="w-full h-full object-contain rounded"
-                style={{ 
-                  imageRendering: 'auto',
-                  objectFit: 'contain'
-                }}
-              />
-            </div>
-          ) : (
-            <div className="h-full flex items-center justify-center bg-gray-100">
-              <div className="w-16 h-16 border-4 border-gray-300 rounded-full flex items-center justify-center">
-                <div className="w-8 h-8 bg-gray-400 rounded-full"></div>
-              </div>
-            </div>
-          )}
-        </div>
-              ) : (
-                <div className="h-full flex items-center justify-center bg-gray-100">
-                  <div className="w-16 h-16 border-4 border-gray-300 rounded-full flex items-center justify-center">
-                    <div className="w-8 h-8 bg-gray-400 rounded-full"></div>
-                  </div>
+              ) : previewData.type === 'after-screenshot' ? (
+                // Show after screenshot - PURELY VISUAL
+                <div className="h-full relative">
+                  {previewData.afterScreenshot ? (
+                    <div className="h-full">
+                      <img 
+                        src={previewData.afterScreenshot}
+                        alt="Preview"
+                        className="w-full h-full object-contain rounded"
+                        style={{ 
+                          imageRendering: 'auto',
+                          objectFit: 'contain'
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <SpiderVideoLoader 
+                      fullScreen={true}
+                      text="Loading screenshot..." 
+                      showText={true}
+                    />
+                  )}
                 </div>
+              ) : (
+                <SpiderVideoLoader 
+                  fullScreen={true}
+                  text="Loading preview..." 
+                  showText={true}
+                />
               )}
             </div>
           )}
           
-          {/* Initial State */}
+          {/* Initial State - Full Screen Spider Video Loader for external links */}
           {!isLoading && !previewData && !error && (
-            <div className="h-full flex flex-col items-center justify-center bg-gray-50">
-              <div className="animate-pulse">
-                <div className="w-16 h-16 bg-blue-500 rounded-full mb-4"></div>
-              </div>
-              <span className="text-lg text-gray-600 font-medium">Hover to see preview</span>
-            </div>
+            <SpiderVideoLoader 
+              fullScreen={true}
+              text={targetUrl.includes('github.com') ? "Crawling GitHub..." : "Crawling external link..."} 
+              showText={true}
+            />
           )}
         </div>
       )}

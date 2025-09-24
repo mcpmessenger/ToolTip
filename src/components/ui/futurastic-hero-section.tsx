@@ -99,7 +99,6 @@ export const AuroraHero = ({ hideText = false, onGetStarted, useProactiveMode = 
                 scale: 0.985,
               }}
               className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-6 py-3 text-gray-50 transition-colors hover:bg-gray-950/50 text-lg font-semibold"
-              title="Try the Extension - Hover to see animated preview"
             >
               Try the Extension
               <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />

@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // import { AutoInstantTooltip } from '../components/AutoInstantTooltip'; // DISABLED - causing conflicts
 // import { InstantTooltip } from '../components/InstantTooltip'; // DISABLED - causing conflicts
 import { SimplePreviewTooltip } from '../components/SimplePreviewTooltip';
+import { SpiderVideoLoader } from '../components/SpiderVideoLoader';
 import { ScrapingProvider, useScraping } from '../contexts/ScrapingContext';
 import { GlobalButtonWrapper } from '../components/GlobalButtonWrapper';
 // import { UniversalProactiveScraper } from '../components/UniversalProactiveScraper'; // DISABLED - using simpleAfterCapture instead
@@ -33,7 +34,7 @@ const DashboardContent: React.FC = () => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { setScraping } = useScraping();
+  const { setScraping, isScraping } = useScraping();
 
   // Trigger proactive scraping when page loads
   useEffect(() => {
@@ -265,14 +266,20 @@ const DashboardContent: React.FC = () => {
         <button
           id="proactive-mode-toggle"
           onClick={() => setUseProactiveMode(!useProactiveMode)}
-          className={`p-3 rounded-full transition-all duration-300 ${
+          className={`p-2 rounded-full transition-all duration-300 ${
             useProactiveMode 
               ? 'bg-green-500/20 hover:bg-green-500/30' 
               : 'hover:bg-white/10'
           }`}
           title={useProactiveMode ? 'Proactive Mode ON' : 'Proactive Mode OFF'}
         >
-          <div className={`w-6 h-6 rounded-full ${useProactiveMode ? 'bg-green-500' : 'bg-gray-500'}`}></div>
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-900/90 border border-gray-700">
+            <SpiderVideoLoader 
+              size={32} 
+              text="" 
+              showText={false}
+            />
+          </div>
         </button>
         </SimplePreviewTooltip>
         
@@ -308,6 +315,7 @@ const DashboardContent: React.FC = () => {
               />
             </div>
           </motion.div>
+
     </div>
   );
 };
