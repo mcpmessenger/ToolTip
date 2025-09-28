@@ -111,6 +111,12 @@ const DashboardContent: React.FC = () => {
             // Store all results globally for tooltips to access
             localStorage.setItem('proactive_scrape_results', JSON.stringify(data.data.results));
             console.log('✅ All results stored in Local Storage!');
+            console.log('📊 Results summary:', {
+              total: data.data.results.length,
+              successful: data.data.results.filter((r: any) => r.success).length,
+              withScreenshots: data.data.results.filter((r: any) => r.afterScreenshot).length,
+              elementIds: data.data.results.map((r: any) => r.elementId)
+            });
             // Show success message
             setMessages(prev => [...prev, {
               id: Date.now().toString(),

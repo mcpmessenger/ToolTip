@@ -1,4 +1,4 @@
-service: tooltip-backend-v2
+service: tooltip-backend-v3
 
 provider:
   name: aws
@@ -10,9 +10,9 @@ provider:
     serverSideEncryption: AES256
   environment:
     NODE_ENV: production
-    SUPABASE_URL: ${env:SUPABASE_URL}
-    SUPABASE_ANON_KEY: ${env:SUPABASE_ANON_KEY}
-    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+    SUPABASE_URL: ${env:SUPABASE_URL, 'not-set'}
+    SUPABASE_ANON_KEY: ${env:SUPABASE_ANON_KEY, 'not-set'}
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY, 'not-set'}
   logs:
     restApi: false
   iam:
@@ -23,6 +23,7 @@ provider:
             - logs:CreateLogGroup
             - logs:CreateLogStream
             - logs:PutLogEvents
+            - logs:TagResource
           Resource: "arn:aws:logs:*:*:*"
 
 functions:

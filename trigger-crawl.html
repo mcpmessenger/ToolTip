@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trigger Fresh Crawl</title>
+</head>
+<body>
+    <h1>Trigger Fresh Crawl</h1>
+    <button onclick="triggerCrawl()">Trigger Fresh Crawl</button>
+    <div id="status"></div>
+    
+    <script>
+        async function triggerCrawl() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = 'Triggering fresh crawl...';
+            
+            try {
+                // Clear any existing state
+                await fetch('http://127.0.0.1:3001/api/after-capture/clear', { method: 'POST' });
+                
+                // Trigger fresh crawl
+                const response = await fetch('http://127.0.0.1:3001/api/after-capture/capture', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: window.location.href })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.innerHTML = `✅ Crawl completed! Found ${data.data.results.length} elements. Check the main page now.`;
+                    
+                    // Store results in localStorage
+                    if (data.data.results) {
+                        localStorage.setItem('proactive_scrape_results', JSON.stringify(data.data.results));
+                        
+                        // Store individual results
+                        data.data.results.forEach((result) => {
+                            if (result.success && result.afterScreenshot) {
+                                const cacheKey = `preview_${window.location.href}_${result.elementId}`;
+                                const previewData = {
+                                    type: 'after-screenshot',
+                                    title: result.title,
+                                    description: result.isExternalNavigation 
+                                        ? `External page: ${result.externalUrl}` 
+                                        : `Result after clicking ${result.title}`,
+                                    afterScreenshot: result.afterScreenshot,
+                                    isExternalNavigation: result.isExternalNavigation,
+                                    externalUrl: result.externalUrl,
+                                    timestamp: result.timestamp || new Date().toISOString()
+                                };
+                                localStorage.setItem(cacheKey, JSON.stringify(previewData));
+                            }
+                        });
+                    }
+                } else {
+                    statusDiv.innerHTML = `❌ Crawl failed: ${data.error || 'Unknown error'}`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
+

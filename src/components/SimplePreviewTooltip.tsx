@@ -83,6 +83,9 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
             setPreviewData(parsedCache);
             setIsLoading(false);
             return;
+          } else {
+            console.log(`⚠️ Cached data for ${elementId} has no screenshot, clearing cache`);
+            localStorage.removeItem(cacheKey);
           }
         } catch (e) {
           console.log(`⚠️ Invalid cached data for ${elementId}, clearing cache`);
@@ -143,14 +146,32 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
     const currentUrl = window.location.href;
     const cacheKey = `preview_${currentUrl}_${elementId}`;
     console.log(`🔍 Checking Local Storage for key: ${cacheKey}`);
+    console.log(`🔍 Current URL: ${currentUrl}`);
+    console.log(`🔍 Element ID: ${elementId}`);
+    
+    // Debug: Check all localStorage keys
+    const allKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('preview_') || key.startsWith('proactive_'))) {
+        allKeys.push(key);
+      }
+    }
+    console.log(`🔍 All relevant localStorage keys:`, allKeys);
     
     const cachedData = localStorage.getItem(cacheKey);
     if (cachedData) {
       try {
         const parsed = JSON.parse(cachedData);
         console.log(`✅ Found cached data for ${elementId}:`, parsed);
-        setPreviewData(parsed);
-        return; // Don't show loading state if we have cached data
+        // Only set preview data if it has a valid screenshot
+        if (parsed && parsed.afterScreenshot) {
+          setPreviewData(parsed);
+          return; // Don't show loading state if we have valid cached data
+        } else {
+          console.log(`⚠️ Cached data for ${elementId} has no screenshot, showing loader`);
+          localStorage.removeItem(cacheKey);
+        }
       } catch (e) {
         console.log(`❌ Invalid cached data for ${elementId}, removing...`);
         localStorage.removeItem(cacheKey);
@@ -159,11 +180,25 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
     
     // Check global proactive scrape results
     const proactiveResults = localStorage.getItem('proactive_scrape_results');
+    console.log(`🔍 Proactive scrape results available:`, !!proactiveResults);
     if (proactiveResults) {
       try {
         const results = JSON.parse(proactiveResults);
+        console.log(`🔍 Total proactive results:`, results.length);
+        console.log(`🔍 All element IDs in proactive results:`, results.map((r: any) => r.elementId));
+        
         const elementResult = results.find((r: any) => r.elementId === elementId);
-        if (elementResult && elementResult.success) {
+        console.log(`🔍 Found element result for ${elementId}:`, !!elementResult);
+        if (elementResult) {
+          console.log(`🔍 Element result details:`, {
+            success: elementResult.success,
+            hasScreenshot: !!elementResult.afterScreenshot,
+            title: elementResult.title,
+            isExternalNavigation: elementResult.isExternalNavigation
+          });
+        }
+        
+        if (elementResult && elementResult.success && elementResult.afterScreenshot) {
           console.log(`✅ Found proactive scrape result for ${elementId}:`, elementResult);
           const previewData = {
             type: 'after-screenshot',
@@ -178,12 +213,19 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
           };
           setPreviewData(previewData);
           localStorage.setItem(cacheKey, JSON.stringify(previewData));
-          return; // Don't show loading state if we have cached data
+          console.log(`💾 Stored preview data for ${elementId} in cache`);
+          return; // Don't show loading state if we have valid cached data
+        } else if (elementResult && !elementResult.afterScreenshot) {
+          console.log(`⚠️ Proactive scrape result for ${elementId} has no screenshot, showing loader`);
+        } else if (!elementResult) {
+          console.log(`⚠️ No proactive scrape result found for ${elementId}`);
         }
       } catch (e) {
-        console.log(`❌ Invalid proactive scrape results, removing...`);
+        console.log(`❌ Invalid proactive scrape results, removing...`, e);
         localStorage.removeItem('proactive_scrape_results');
       }
+    } else {
+      console.log(`⚠️ No proactive_scrape_results found in localStorage`);
     }
     
     // Only show loading state if no cached data found
@@ -222,6 +264,9 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
           console.log(`✅ Found cached preview data on mount for ${elementId}`);
           setPreviewData(parsedCache);
           setHasAttemptedFetch(true);
+        } else {
+          console.log(`⚠️ Cached data on mount for ${elementId} has no screenshot, clearing cache`);
+          localStorage.removeItem(cacheKey);
         }
       } catch (e) {
         console.log(`⚠️ Invalid cached data on mount for ${elementId}, clearing cache`);

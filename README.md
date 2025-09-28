@@ -213,23 +213,29 @@ npm run dev
 
 ## ⚠️ Current Status (Latest Update)
 
-**System Status**: ✅ **FULLY WORKING** - All functionality operational including external links
+**System Status**: 🔄 **PARTIALLY WORKING** - Core functionality works but external URL capture has issues
 
 ### ✅ **What's Working:**
-- **All Button Screenshots**: Both local and external buttons capture and display correctly
-- **External URL Navigation**: GitHub documentation button successfully captures external page screenshots
+- **Local Button Screenshots**: Internal buttons capture and display correctly
 - **Local Storage Caching**: Screenshots stored as base64 in browser Local Storage
-- **Instant Tooltips**: Hover over buttons shows cached screenshots immediately
+- **Instant Tooltips**: Hover over local buttons shows cached screenshots immediately
 - **Port Configuration**: Frontend runs on port 8082, backend on port 3001
 - **High-Quality Images**: Improved image quality with better compression algorithms
+- **UI Components**: All React components and tooltip system working properly
 
-### 🔧 **Recent Major Fixes Applied:**
-- ✅ **External Link Detection**: Fixed external URL capture for GitHub documentation button
-- ✅ **Port Alignment**: Frontend (8082) and backend (3001) properly configured
-- ✅ **Element Visibility**: Added proper waits for Framer Motion animations
-- ✅ **Rate Limiting**: Implemented proper rate limiting to prevent aggressive scraping
-- ✅ **Image Quality**: Enhanced screenshot quality with Lanczos3 resampling and mozjpeg compression
-- ✅ **Error Handling**: Comprehensive error reporting and fallback mechanisms
+### 🐛 **Known Issues:**
+- **External URL Capture**: GitHub and Google buttons fail to capture external page screenshots
+- **Processing Interruption**: Backend processing gets interrupted during element capture
+- **Rate Limiting Conflicts**: Multiple requests cause global capturing flag to be set to false
+- **Empty Results**: `proactive_scrape_results` in localStorage is often empty due to processing failures
+
+### 🔧 **Recent Attempts to Fix:**
+- ✅ **Enhanced Element Detection**: Added specific logging for Google vs GitHub button detection
+- ✅ **Improved Timeouts**: Increased timeouts for external URL navigation (30s navigation, 20s network idle)
+- ✅ **Rate Limiting**: Increased from 0.1s to 5s between requests to prevent conflicts
+- ✅ **Global Timeout**: Extended from 120s to 300s for complete processing
+- ✅ **Error Handling**: Enhanced error reporting and fallback mechanisms
+- ❌ **Still Failing**: External URL capture continues to fail with processing interruptions
 
 ### 🐛 **Image Blurriness Bug - RESOLVED**
 
@@ -268,12 +274,29 @@ npm run dev
 **Results**: Screenshots now display with significantly improved clarity while maintaining reasonable file sizes for Local Storage.
 
 ### 🎯 **System Performance**:
-- **Capture Success Rate**: 100% (10/10 elements captured successfully)
-- **External Navigation**: Working perfectly (GitHub page screenshots)
-- **Image Quality**: High-resolution, crisp screenshots
+- **Local Capture Success Rate**: 100% (internal buttons work perfectly)
+- **External Navigation**: ❌ **FAILING** (GitHub/Google buttons not capturing)
+- **Image Quality**: High-resolution, crisp screenshots for successful captures
 - **Load Times**: Fast tooltip display with cached images
 - **Memory Usage**: Optimized base64 storage in Local Storage
+
+### 🚨 **Critical Issues to Address**:
+
+1. **Backend Processing Race Conditions**: Multiple concurrent requests are causing the global capturing flag to be set to false, interrupting element processing
+2. **External URL Navigation Failures**: Playwright is failing to properly navigate to external URLs (GitHub, Google) and capture screenshots
+3. **Rate Limiting Conflicts**: The current rate limiting system is too aggressive and causes processing interruptions
+4. **Element Detection Issues**: The element finding logic may not be correctly identifying and processing external link elements
+
+### 🔧 **Recommended Next Steps**:
+
+1. **Implement Request Queuing**: Replace rate limiting with a proper request queue to prevent concurrent processing conflicts
+2. **Fix External URL Handling**: Debug and fix the Playwright external URL navigation logic
+3. **Improve Error Recovery**: Add better error recovery mechanisms for failed captures
+4. **Add Retry Logic**: Implement retry mechanisms for failed external URL captures
+5. **Simplify Processing**: Consider processing external URLs separately from internal elements
 
 ---
 
 **ToolTip Companion v1.0** - Making web interactions more intuitive with proactive visual feedback.
+
+**Note**: This project is currently in active development. The core tooltip system works perfectly for local elements, but external URL capture needs additional work to be fully functional.

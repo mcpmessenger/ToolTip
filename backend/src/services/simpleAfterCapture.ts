@@ -36,7 +36,7 @@ export class SimpleAfterCapture {
   private isCapturing = false;
   private processingUrls = new Set<string>();
   private lastRequestTime = 0;
-  private readonly MIN_REQUEST_INTERVAL = 100; // 0.1 seconds between requests
+  private readonly MIN_REQUEST_INTERVAL = 5000; // 5 seconds between requests
   private static globalCapturing = false;
   private static processingQueue: string[] = [];
   private static currentProcessingUrl: string | null = null;
@@ -104,12 +104,12 @@ export class SimpleAfterCapture {
       };
     }
 
-    // Set a global timeout for the entire capture process (120 seconds for 20 elements)
+    // Set a global timeout for the entire capture process (300 seconds for 20 elements)
     const globalTimeout = setTimeout(() => {
       console.log(`⏰ Global capture timeout reached for ${url} - this may interrupt element processing`);
       SimpleAfterCapture.globalCapturing = false;
       SimpleAfterCapture.currentProcessingUrl = null;
-    }, 120000);
+    }, 300000);
     
     // Rate limiting - prevent too many requests
     const now = Date.now();
@@ -537,9 +537,15 @@ export class SimpleAfterCapture {
           console.log(`🔍 Found ${allAnchors.length} anchor tags on page`);
           for (let i = 0; i < allAnchors.length; i++) {
             const anchor = allAnchors[i] as HTMLAnchorElement;
-            if (anchor.textContent?.includes('View Documentation') || anchor.textContent?.includes('📚')) {
+            console.log(`🔍 Anchor ${i}: id="${anchor.id}", text="${anchor.textContent?.trim()}", href="${anchor.href}"`);
+            if (anchor.textContent?.includes('View Documentation') || anchor.textContent?.includes('📚') || anchor.textContent?.includes('GitHub')) {
               el = anchor;
-              console.log(`🔍 Found View Documentation anchor by text content`);
+              console.log(`🔍 Found GitHub anchor by text content`);
+              break;
+            }
+            if (anchor.textContent?.includes('Google')) {
+              el = anchor;
+              console.log(`🔍 Found Google anchor by text content`);
               break;
             }
           }
@@ -653,12 +659,35 @@ export class SimpleAfterCapture {
         if (href) {
           console.log(`🌍 External URL: ${href}`);
           console.log(`🔍 External link processing - selector: ${element.selector}, text: "${element.text}"`);
+          console.log(`🔍 Element ID: ${elementId}`);
+          
           try {
-            await page.goto(href, { waitUntil: 'networkidle', timeout: 15000 });
-            console.log(`✅ Navigated to external URL: ${href}`);
+            console.log(`🚀 Attempting navigation to: ${href}`);
+            await page.goto(href, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            console.log(`✅ Successfully navigated to external URL: ${href}`);
+            
+            // Wait for page to stabilize
+            console.log(`⏳ Waiting for page to stabilize...`);
+            await page.waitForTimeout(3000);
+            
+            // Try to wait for network idle with fallback
+            try {
+              console.log(`⏳ Waiting for network idle...`);
+              await page.waitForLoadState("networkidle", { timeout: 10000 });
+              console.log(`✅ External page network idle: ${href}`);
+            } catch (networkIdleError) {
+              console.log(`⚠️ Network idle timeout for ${href}, continuing with current state:`, networkIdleError instanceof Error ? networkIdleError.message : 'Unknown error');
+              await page.waitForTimeout(2000);
+            }
+            
             console.log(`📸 Capturing external page screenshot for: ${elementId}`);
           } catch (e) {
             console.error(`❌ Failed to navigate to external URL: ${href}`, e);
+            console.error(`❌ Error details:`, {
+              message: e instanceof Error ? e.message : 'Unknown error',
+              name: e instanceof Error ? e.name : 'Unknown',
+              stack: e instanceof Error ? e.stack : 'No stack trace'
+            });
             throw new Error('external_navigation_failed');
           }
         } else {
@@ -720,16 +749,18 @@ export class SimpleAfterCapture {
           // More robust waiting for external page to load
           try {
             // Attempt to wait for network to be idle, with a longer timeout
-            await page.waitForLoadState("networkidle", { timeout: 15000 }); // Increased timeout to 15 seconds
+            await page.waitForLoadState("networkidle", { timeout: 20000 }); // Increased timeout to 20 seconds
             console.log(`✅ External page loaded successfully (networkidle): ${currentUrl}`);
           } catch (timeoutError) {
             console.log(`⚠️ External page networkidle timeout, falling back to domcontentloaded and longer wait: ${currentUrl}`);
             try {
-              await page.waitForLoadState("domcontentloaded", { timeout: 10000 }); // 10 second timeout
-              await page.waitForTimeout(5000); // Additional wait for dynamic content
+              await page.waitForLoadState("domcontentloaded", { timeout: 15000 }); // 15 second timeout
+              await page.waitForTimeout(8000); // Additional wait for dynamic content
               console.log(`✅ External page loaded successfully (domcontentloaded + extra wait): ${currentUrl}`);
             } catch (fallbackTimeoutError) {
               console.log(`❌ External page load failed after multiple attempts, continuing with current state: ${currentUrl}`);
+              // Still try to take a screenshot even if loading failed
+              await page.waitForTimeout(3000);
             }
           }
           
