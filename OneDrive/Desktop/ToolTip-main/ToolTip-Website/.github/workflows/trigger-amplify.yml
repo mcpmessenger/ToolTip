@@ -19,8 +19,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
 
-      - name: Verify AWS CLI
+      - name: Install Dependencies
         run: |
+          # Install AWS CLI if needed
           if ! command -v aws &> /dev/null; then
             echo "Installing AWS CLI v2..."
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -29,9 +30,15 @@ jobs:
           else
             echo "AWS CLI already available"
           fi
+          
+          # Install jq for JSON processing
+          sudo apt-get update
+          sudo apt-get install -y jq
+          
           aws --version
+          jq --version
 
-      - name: Trigger Amplify Build
+      - name: Update Amplify Build Settings
         env:
           AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
           AMPLIFY_BRANCH_NAME: ${{ secrets.AMPLIFY_BRANCH_NAME || 'main' }}
@@ -41,6 +48,27 @@ jobs:
             exit 1
           fi
 
+          echo "⚙️  Updating Amplify branch to use amplify.yml..."
+          
+          # Update branch to use amplify.yml buildspec
+          if [ -f amplify.yml ]; then
+            # Use file:// prefix to read buildspec from file
+            aws amplify update-branch \
+              --app-id "$AMPLIFY_APP_ID" \
+              --branch-name "$AMPLIFY_BRANCH_NAME" \
+              --build-spec file://amplify.yml \
+              2>&1 || echo "⚠️  Could not update buildspec automatically. Please configure in Amplify Console: App Settings > Build settings > Build specification"
+            
+            echo "✅ Build settings updated (if permission granted)"
+          else
+            echo "⚠️  amplify.yml not found, skipping buildspec update"
+          fi
+
+      - name: Trigger Amplify Build
+        env:
+          AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
+          AMPLIFY_BRANCH_NAME: ${{ secrets.AMPLIFY_BRANCH_NAME || 'main' }}
+        run: |
           echo "🚀 Starting Amplify build for app: $AMPLIFY_APP_ID"
           echo "📦 Branch: $AMPLIFY_BRANCH_NAME"
           echo "🔗 Repository: ${{ github.repository }}"
