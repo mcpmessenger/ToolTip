@@ -1,0 +1,39 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - echo "🚀 Starting ToolTip Companion Chrome Extension build..."
+        - echo "📦 Installing frontend dependencies..."
+        - cp package-amplify.json package.json
+        - npm ci
+    build:
+      commands:
+        - echo "🏗️ Building frontend..."
+        - npm run build
+        - echo "📦 Installing backend dependencies..."
+        - cd backend
+        - cp package-amplify.json package.json
+        - npm ci
+        - echo "🏗️ Building backend..."
+        - npm run build
+        - cd ..
+        - echo "📁 Creating deployment structure..."
+        - mkdir -p dist/backend
+        - cp -r backend/dist/* dist/backend/
+        - cp backend/package.json dist/backend/
+        - echo "📋 Copying server.js..."
+        - cp dist/server.js dist/server.js 2>/dev/null || echo "Using existing server.js"
+    postBuild:
+      commands:
+        - echo "✅ Build completed successfully!"
+        - echo "📊 Build artifacts ready for deployment"
+        - echo "🔌 Chrome Extension build ready"
+  artifacts:
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - backend/node_modules/**/*
