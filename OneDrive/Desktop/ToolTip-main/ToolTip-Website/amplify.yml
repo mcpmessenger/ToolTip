@@ -6,7 +6,7 @@ frontend:
         - echo "🚀 Starting ToolTip Companion Chrome Extension build..."
         - echo "📦 Installing frontend dependencies..."
         - cp package-amplify.json package.json
-        - npm ci
+        - npm install --legacy-peer-deps
     build:
       commands:
         - echo "🏗️ Building frontend..."
@@ -14,7 +14,7 @@ frontend:
         - echo "📦 Installing backend dependencies..."
         - cd backend
         - cp package-amplify.json package.json
-        - npm ci
+        - npm install --legacy-peer-deps
         - echo "🏗️ Building backend..."
         - npm run build
         - cd ..
