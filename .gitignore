@@ -200,6 +200,3 @@ black.png
 
 # Desktop system files
 public/desktop.ini
-
-# Exclude src assets unless explicitly needed
-src/assets/spider.png
