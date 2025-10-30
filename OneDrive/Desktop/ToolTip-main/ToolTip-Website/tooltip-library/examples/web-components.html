@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolTip Library - Web Components Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .example-section {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .example-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            margin: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .example-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1, h2 {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 ToolTip Library - Web Components</h1>
+        
+        <div class="status">
+            ✅ Phase 2 Complete: Multi-Framework Integration<br>
+            🌐 Web Components, React, Vue, Angular, and Vanilla JS APIs
+        </div>
+        
+        <div class="example-section">
+            <h2>Basic Tooltip (Web Component)</h2>
+            <p>Using the custom &lt;tooltip-element&gt; web component:</p>
+            
+            <tooltip-element 
+                content="This is a basic tooltip using Web Components!"
+                placement="top"
+                trigger="hover"
+                theme="default">
+                <button class="example-button">Hover me (Basic)</button>
+            </tooltip-element>
+            
+            <tooltip-element 
+                content="Click me to toggle this tooltip!"
+                placement="bottom"
+                trigger="click"
+                theme="material"
+                arrow="true">
+                <button class="example-button">Click me (Material)</button>
+            </tooltip-element>
+        </div>
+        
+        <div class="example-section">
+            <h2>Glass Tooltip (Web Component)</h2>
+            <p>Using the custom &lt;glass-tooltip&gt; web component with 3D effects:</p>
+            
+            <glass-tooltip 
+                content="Amazing glass tooltip with 3D effects!"
+                placement="right"
+                trigger="hover"
+                glass-effect="true"
+                animation-3d="true"
+                glass-opacity="0.8"
+                blur-intensity="16">
+                <button class="example-button">Hover me (Glass)</button>
+            </glass-tooltip>
+            
+            <glass-tooltip 
+                content="Interactive glass tooltip - hover to keep it open!"
+                placement="left"
+                trigger="click"
+                interactive="true"
+                glass-effect="true"
+                animation-3d="true"
+                hover-transform="rotate3d(1,1,0,20deg) scale(1.05)">
+                <div class="glass-card">
+                    <h3>Glass Card</h3>
+                    <p>Click me for an interactive glass tooltip!</p>
+                </div>
+            </glass-tooltip>
+        </div>
+        
+        <div class="example-section">
+            <h2>Vanilla JavaScript API</h2>
+            <p>Using the vanilla JavaScript API for programmatic control:</p>
+            
+            <button id="vanilla-basic" class="example-button">Vanilla Basic</button>
+            <button id="vanilla-glass" class="example-button">Vanilla Glass</button>
+            <button id="vanilla-interactive" class="example-button">Vanilla Interactive</button>
+        </div>
+        
+        <div class="example-section">
+            <h2>Framework Integration Status</h2>
+            <ul style="text-align: left; color: rgba(255, 255, 255, 0.9);">
+                <li>✅ <strong>Web Components</strong> - Custom elements with Shadow DOM</li>
+                <li>✅ <strong>React</strong> - Enhanced components with ref forwarding</li>
+                <li>✅ <strong>Vue.js</strong> - Single-file component with Composition API</li>
+                <li>✅ <strong>Angular</strong> - Directive with full lifecycle management</li>
+                <li>✅ <strong>Vanilla JS</strong> - Programmatic API with manager pattern</li>
+            </ul>
+        </div>
+        
+        <div class="example-section">
+            <h2>Next Steps: Phase 3</h2>
+            <p>Ready to proceed with advanced features:</p>
+            <ul style="text-align: left; color: rgba(255, 255, 255, 0.9);">
+                <li>🎯 Advanced positioning engine with collision detection</li>
+                <li>🎮 Interactive content support (forms, buttons, complex layouts)</li>
+                <li>✨ Enhanced animation system with performance optimization</li>
+                <li>♿ Comprehensive accessibility implementation</li>
+                <li>📱 Mobile-optimized interactions and responsive behavior</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Import the vanilla JavaScript API
+        import { createTooltip, createGlassTooltip } from './src/vanilla/index.js';
+        
+        // Basic vanilla tooltip
+        const basicButton = document.getElementById('vanilla-basic');
+        createTooltip(basicButton, {
+            content: 'This tooltip was created with the vanilla JavaScript API!',
+            placement: 'top',
+            trigger: 'hover',
+            theme: 'default',
+            arrow: true
+        });
+        
+        // Glass vanilla tooltip
+        const glassButton = document.getElementById('vanilla-glass');
+        createGlassTooltip(glassButton, {
+            content: 'Vanilla JavaScript glass tooltip with 3D effects!',
+            placement: 'bottom',
+            trigger: 'hover',
+            glassEffect: true,
+            animation3D: true,
+            glassOpacity: 0.8,
+            blurIntensity: 16
+        });
+        
+        // Interactive vanilla tooltip
+        const interactiveButton = document.getElementById('vanilla-interactive');
+        createTooltip(interactiveButton, {
+            content: 'Interactive vanilla tooltip - hover to keep it open!',
+            placement: 'right',
+            trigger: 'click',
+            interactive: true,
+            theme: 'dark',
+            arrow: true
+        });
+        
+        console.log('🎯 ToolTip Library Phase 2 Complete!');
+        console.log('🌐 Web Components, React, Vue, Angular, and Vanilla JS APIs ready!');
+        console.log('🚀 Ready for Phase 3: Advanced Features');
+    </script>
+</body>
+</html>

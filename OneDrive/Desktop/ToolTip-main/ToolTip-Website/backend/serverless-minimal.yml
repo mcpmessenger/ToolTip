@@ -1,0 +1,33 @@
+service: tooltip-backend-minimal
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: dev
+  deploymentBucket:
+    name: tooltip-backend-deployments-396608803476
+    serverSideEncryption: AES256
+  environment:
+    NODE_ENV: production
+  logs:
+    restApi: false
+    frameworkLambda: false
+
+functions:
+  api:
+    handler: dist/lambda.handler
+    timeout: 29
+    memorySize: 1024
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+      - http:
+          path: /
+          method: ANY
+          cors: true
+
+plugins:
+  - serverless-offline

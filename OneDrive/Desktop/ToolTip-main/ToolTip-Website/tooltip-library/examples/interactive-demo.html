@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolTip Library - Interactive Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .demo-section {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .demo-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .keyboard-shortcuts {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .keyboard-shortcuts ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .keyboard-shortcuts li {
+            margin: 8px 0;
+            padding: 5px 0;
+        }
+        
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            max-height: 200px;
+            overflow: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .state-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        h1, h2, h3 {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            display: inline-block;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .instructions ol {
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Interactive Tooltip Demo</h1>
+        
+        <div class="status">
+            ✅ Phase 3 Advanced Features: Interactive Tooltips with Keyboard Controls<br>
+            🎮 Draggable, Resizable, and Keyboard-Controlled Tooltips
+        </div>
+        
+        <div class="demo-section">
+            <h2>⌨️ Keyboard Controls</h2>
+            <div class="keyboard-shortcuts">
+                <h3>Available Shortcuts:</h3>
+                <ul>
+                    <li>🎯 <strong>Ctrl + /</strong> - Show tooltip</li>
+                    <li>❌ <strong>Ctrl + -</strong> - Hide tooltip</li>
+                    <li>🔄 <strong>Ctrl + T</strong> - Toggle tooltip</li>
+                    <li>🚪 <strong>Escape</strong> - Hide tooltip</li>
+                    <li>⬆️ <strong>Ctrl + ↑</strong> - Move up</li>
+                    <li>⬇️ <strong>Ctrl + ↓</strong> - Move down</li>
+                    <li>⬅️ <strong>Ctrl + ←</strong> - Move left</li>
+                    <li>➡️ <strong>Ctrl + →</strong> - Move right</li>
+                    <li>➕ <strong>Ctrl + +</strong> - Increase size</li>
+                    <li>➖ <strong>Ctrl + -</strong> - Decrease size</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>🎮 Interactive Tooltips</h2>
+            
+            <!-- Basic Interactive Tooltip -->
+            <div id="basic-tooltip-container">
+                <button id="basic-tooltip-trigger" class="demo-button">
+                    🎮 Interactive Tooltip
+                </button>
+            </div>
+            
+            <!-- Glass Tooltip -->
+            <div id="glass-tooltip-container">
+                <div id="glass-tooltip-trigger" class="glass-card">
+                    <h3>✨ Glass Card</h3>
+                    <p>Hover me for a glass tooltip!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>📊 Tooltip State & Log</h2>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>⌨️ Keyboard Action Log</h3>
+                    <button id="clear-log" class="demo-button" style="margin-bottom: 10px;">
+                        Clear Log
+                    </button>
+                    <div id="keyboard-log" class="log-container">
+                        <div style="color: rgba(255, 255, 255, 0.5);">
+                            No keyboard actions yet. Try the shortcuts above!
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>📊 Tooltip State</h3>
+                    <div id="tooltip-state" class="state-display">
+                        <div><strong>Visible:</strong> <span id="visible-status">No</span></div>
+                        <div><strong>Position:</strong> x: <span id="position-x">0</span>, y: <span id="position-y">0</span></div>
+                        <div><strong>Size:</strong> <span id="size-width">300</span> × <span id="size-height">150</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>🎯 How to Use</h2>
+            <div class="instructions">
+                <ol>
+                    <li><strong>Click</strong> the buttons above to show tooltips</li>
+                    <li><strong>Drag</strong> the tooltips by their top handle to move them</li>
+                    <li><strong>Resize</strong> by dragging the corner handles</li>
+                    <li><strong>Use keyboard shortcuts</strong> to control tooltips programmatically</li>
+                    <li><strong>Watch the log</strong> to see keyboard actions in real-time</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>🚀 Next Steps: Phase 4</h2>
+            <p>Ready to proceed with developer experience enhancements:</p>
+            <ul style="text-align: left; color: rgba(255, 255, 255, 0.9);">
+                <li>📚 Comprehensive documentation and API reference</li>
+                <li>🛠️ Development tools and debugging utilities</li>
+                <li>🧪 Testing framework with visual regression testing</li>
+                <li>♿ Accessibility audits and compliance testing</li>
+                <li>📱 Mobile optimization and responsive behavior</li>
+                <li>🎨 Theme customization and design system integration</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Import the vanilla JavaScript API
+        import { createTooltip, createGlassTooltip } from './src/vanilla/index.js';
+        
+        // State management
+        let tooltipState = {
+            position: { x: 0, y: 0 },
+            size: { width: 300, height: 150 },
+            isVisible: false,
+        };
+        
+        let keyboardLog = [];
+        
+        // Log keyboard actions
+        const logKeyboardAction = (action, data) => {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${action}${data ? ` - ${JSON.stringify(data)}` : ''}`;
+            keyboardLog.push(logEntry);
+            if (keyboardLog.length > 10) {
+                keyboardLog = keyboardLog.slice(-10);
+            }
+            updateKeyboardLog();
+        };
+        
+        // Update keyboard log display
+        const updateKeyboardLog = () => {
+            const logContainer = document.getElementById('keyboard-log');
+            if (keyboardLog.length === 0) {
+                logContainer.innerHTML = '<div style="color: rgba(255, 255, 255, 0.5);">No keyboard actions yet. Try the shortcuts above!</div>';
+            } else {
+                logContainer.innerHTML = keyboardLog.map(log => `<div style="margin-bottom: 5px;">${log}</div>`).join('');
+            }
+        };
+        
+        // Update tooltip state display
+        const updateTooltipState = () => {
+            document.getElementById('visible-status').textContent = tooltipState.isVisible ? 'Yes' : 'No';
+            document.getElementById('position-x').textContent = tooltipState.position.x;
+            document.getElementById('position-y').textContent = tooltipState.position.y;
+            document.getElementById('size-width').textContent = tooltipState.size.width;
+            document.getElementById('size-height').textContent = tooltipState.size.height;
+        };
+        
+        // Clear log button
+        document.getElementById('clear-log').addEventListener('click', () => {
+            keyboardLog = [];
+            updateKeyboardLog();
+        });
+        
+        // Basic interactive tooltip
+        const basicButton = document.getElementById('basic-tooltip-trigger');
+        const basicTooltip = createTooltip(basicButton, {
+            content: `
+                <div style="padding: 20px;">
+                    <h3>🎮 Interactive Tooltip</h3>
+                    <p>This tooltip can be:</p>
+                    <ul style="text-align: left; margin: 10px 0;">
+                        <li>🖱️ <strong>Dragged</strong> by the top handle</li>
+                        <li>📏 <strong>Resized</strong> by the corner handles</li>
+                        <li>⌨️ <strong>Controlled</strong> with keyboard shortcuts</li>
+                        <li>🎨 <strong>Styled</strong> with glass morphism effects</li>
+                    </ul>
+                    <p>Try the keyboard shortcuts or drag it around!</p>
+                </div>
+            `,
+            placement: 'top',
+            trigger: 'click',
+            theme: 'glass',
+            interactive: true,
+            onShow: () => {
+                tooltipState.isVisible = true;
+                updateTooltipState();
+                logKeyboardAction('show');
+            },
+            onHide: () => {
+                tooltipState.isVisible = false;
+                updateTooltipState();
+                logKeyboardAction('hide');
+            }
+        });
+        
+        // Glass tooltip
+        const glassCard = document.getElementById('glass-tooltip-trigger');
+        const glassTooltip = createGlassTooltip(glassCard, {
+            content: `
+                <div style="padding: 20px;">
+                    <h3>✨ Glass Morphism Tooltip</h3>
+                    <p>This tooltip features the signature 3D glass effects from the original ToolTip Companion!</p>
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 8px; margin: 10px 0;">
+                        <strong>Features:</strong>
+                        <ul style="text-align: left; margin: 5px 0;">
+                            <li>3D hover transformations</li>
+                            <li>Backdrop blur effects</li>
+                            <li>Decorative glass layers</li>
+                            <li>Smooth animations</li>
+                        </ul>
+                    </div>
+                    <button onclick="alert('Button clicked inside tooltip!')" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                        Click me!
+                    </button>
+                </div>
+            `,
+            placement: 'right',
+            trigger: 'hover',
+            glassEffect: true,
+            animation3D: true,
+            glassOpacity: 0.9,
+            blurIntensity: 16,
+            shadowIntensity: 0.4,
+            hoverTransform: 'rotate3d(1,1,0,20deg) scale(1.05)',
+            onShow: () => {
+                tooltipState.isVisible = true;
+                updateTooltipState();
+                logKeyboardAction('show');
+            },
+            onHide: () => {
+                tooltipState.isVisible = false;
+                updateTooltipState();
+                logKeyboardAction('hide');
+            }
+        });
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === '/') {
+                e.preventDefault();
+                basicTooltip.show();
+                logKeyboardAction('keyboard: show (Ctrl + /)');
+            } else if (e.ctrlKey && e.key === '-') {
+                e.preventDefault();
+                basicTooltip.hide();
+                logKeyboardAction('keyboard: hide (Ctrl + -)');
+            } else if (e.ctrlKey && e.key === 't') {
+                e.preventDefault();
+                if (tooltipState.isVisible) {
+                    basicTooltip.hide();
+                } else {
+                    basicTooltip.show();
+                }
+                logKeyboardAction('keyboard: toggle (Ctrl + T)');
+            } else if (e.key === 'Escape' && tooltipState.isVisible) {
+                basicTooltip.hide();
+                logKeyboardAction('keyboard: hide (Escape)');
+            } else if (e.ctrlKey && e.key === 'ArrowUp') {
+                e.preventDefault();
+                tooltipState.position.y = Math.max(0, tooltipState.position.y - 10);
+                logKeyboardAction('keyboard: move up (Ctrl + ↑)', { position: tooltipState.position });
+            } else if (e.ctrlKey && e.key === 'ArrowDown') {
+                e.preventDefault();
+                tooltipState.position.y = Math.min(window.innerHeight - tooltipState.size.height, tooltipState.position.y + 10);
+                logKeyboardAction('keyboard: move down (Ctrl + ↓)', { position: tooltipState.position });
+            } else if (e.ctrlKey && e.key === 'ArrowLeft') {
+                e.preventDefault();
+                tooltipState.position.x = Math.max(0, tooltipState.position.x - 10);
+                logKeyboardAction('keyboard: move left (Ctrl + ←)', { position: tooltipState.position });
+            } else if (e.ctrlKey && e.key === 'ArrowRight') {
+                e.preventDefault();
+                tooltipState.position.x = Math.min(window.innerWidth - tooltipState.size.width, tooltipState.position.x + 10);
+                logKeyboardAction('keyboard: move right (Ctrl + →)', { position: tooltipState.position });
+            } else if (e.ctrlKey && (e.key === '+' || e.key === '=')) {
+                e.preventDefault();
+                tooltipState.size.width = Math.min(600, tooltipState.size.width + 20);
+                tooltipState.size.height = Math.min(400, tooltipState.size.height + 20);
+                logKeyboardAction('keyboard: increase size (Ctrl + +)', { size: tooltipState.size });
+            } else if (e.ctrlKey && e.key === '-') {
+                e.preventDefault();
+                tooltipState.size.width = Math.max(200, tooltipState.size.width - 20);
+                tooltipState.size.height = Math.max(100, tooltipState.size.height - 20);
+                logKeyboardAction('keyboard: decrease size (Ctrl + -)', { size: tooltipState.size });
+            }
+        });
+        
+        console.log('🎮 Interactive Tooltip Demo Loaded!');
+        console.log('⌨️ Try the keyboard shortcuts: Ctrl + /, Ctrl + -, Ctrl + T, etc.');
+        console.log('🎯 Click the buttons to show interactive tooltips!');
+    </script>
+</body>
+</html>

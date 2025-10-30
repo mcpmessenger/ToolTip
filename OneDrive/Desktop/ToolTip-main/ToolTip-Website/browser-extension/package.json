@@ -1,0 +1,27 @@
+{
+  "name": "tooltip-companion-extension",
+  "version": "1.0.0",
+  "description": "Browser extension for ToolTip Companion - AI-powered tooltips for any webpage",
+  "main": "build.js",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js && echo 'Extension built. Load the dist/ folder in Chrome.'",
+    "clean": "rm -rf dist",
+    "test": "echo 'Extension testing not implemented yet'"
+  },
+  "keywords": [
+    "browser-extension",
+    "tooltip",
+    "ai",
+    "chrome-extension",
+    "firefox-extension"
+  ],
+  "author": "ToolTip Companion Team",
+  "license": "MIT",
+  "devDependencies": {
+    "canvas": "^2.11.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

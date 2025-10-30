@@ -1,0 +1,49 @@
+service: tooltip-backend-v2
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  deploymentBucket:
+    name: tooltip-backend-deployments-${aws:accountId}
+    serverSideEncryption: AES256
+  environment:
+    NODE_ENV: production
+    SUPABASE_URL: ${env:SUPABASE_URL}
+    SUPABASE_ANON_KEY: ${env:SUPABASE_ANON_KEY}
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+  logs:
+    restApi: false
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "arn:aws:logs:*:*:*"
+
+functions:
+  api:
+    handler: dist/lambda.handler
+    timeout: 29
+    memorySize: 1024
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+      - http:
+          path: /
+          method: ANY
+          cors: true
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3001
+    host: 0.0.0.0
