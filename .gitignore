@@ -183,7 +183,12 @@ playwright/.cache/
 backend/gifs/
 backend/screenshots/
 *.gif
-*.png
+
+# Screenshots and development images - keep only essential assets
+public/Screenshot*.png
+
+# Deployment logs and archives
+Deployment-*/
 
 # Amplify optimization - exclude large build artifacts
 backend/.serverless/
@@ -192,4 +197,9 @@ backend/.serverless/
 
 # Large assets that shouldn't be in git
 black.png
-spider.png
+
+# Desktop system files
+public/desktop.ini
+
+# Exclude src assets unless explicitly needed
+src/assets/spider.png
