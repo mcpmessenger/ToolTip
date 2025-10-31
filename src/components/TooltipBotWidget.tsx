@@ -13,6 +13,19 @@ type PageAction = {
   selector: string;
 };
 
+// UUID helper function for browser compatibility
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for browsers without crypto.randomUUID
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 const mockReply = (input: string): string => {
   if (!input.trim()) return "Tell me about what you're browsing, and I'll emulate the assistant.";
   return `Demo assistant: I would analyze the page and respond about "${input}". Install the extension for the full experience.`;
@@ -20,7 +33,7 @@ const mockReply = (input: string): string => {
 
 export const TooltipBotWidget: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -77,13 +90,46 @@ export const TooltipBotWidget: React.FC = () => {
   const handleSend = () => {
     const text = input.trim();
     if (!text || busy) return;
-    const userMsg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: text };
+    const userMsg: ChatMessage = { id: generateUUID(), role: 'user', content: text };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setBusy(true);
     // Local smart behavior
     let reply = '';
-    if (/^\s*(summarize|explain)\b/i.test(text)) {
+    const lowerText = text.toLowerCase();
+    
+    // Check for installation-related queries
+    if (/install|setup|get started|how to use|download/i.test(text) && /extension|tooltip|companion/i.test(text)) {
+      reply = `📎 **How to Install ToolTip Companion Extension:**
+
+**Step 1: Download the Extension**
+- Visit the GitHub repository: https://github.com/mcpmessenger/Tooltip-Companion-Chrome-Extension
+- Click the green "Code" button
+- Select "Download ZIP" or clone the repository
+
+**Step 2: Extract the Files**
+- Unzip the downloaded file (if you downloaded as ZIP)
+- Remember where you saved the extension folder
+
+**Step 3: Load Extension in Chrome**
+1. Open Chrome and navigate to \`chrome://extensions/\`
+2. Enable **Developer mode** (toggle in top-right corner)
+3. Click **Load unpacked**
+4. Select the extension folder you downloaded
+
+**Step 4: Configure Backend (Optional)**
+- Right-click the extension icon
+- Select **Options**
+- Enter your backend URL (default: http://localhost:3000)
+- Optionally add your OpenAI API key for AI features
+
+**Step 5: Start Using!**
+- Visit any website
+- Hover over links to see previews
+- Click the clippy icon to open the AI chat assistant
+
+Need help with backend setup? Check the GitHub repository for detailed instructions.`;
+    } else if (/^\s*(summarize|explain)\b/i.test(text)) {
       reply = summarizePage() || 'No summary info available.';
     } else if (/^\s*(detect|scan)\b/i.test(text)) {
       const list = scanPageActions();
@@ -99,7 +145,7 @@ export const TooltipBotWidget: React.FC = () => {
       }
     }
     setTimeout(() => {
-      setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: reply }]);
+      setMessages(prev => [...prev, { id: generateUUID(), role: 'assistant', content: reply }]);
       setBusy(false);
     }, 400);
   };
@@ -153,17 +199,20 @@ export const TooltipBotWidget: React.FC = () => {
 
   const isDark = theme === 'dark';
   const containerClasses = isDark
-    ? 'w-[360px] max-h-[72vh] flex flex-col rounded-xl bg-gray-950/90 border border-gray-800 shadow-2xl backdrop-blur text-gray-200'
-    : 'w-[360px] max-h-[72vh] flex flex-col rounded-xl bg-white border border-gray-200 shadow-2xl text-gray-900';
+    ? 'w-[360px] max-h-[72vh] flex flex-col rounded-2xl bg-gray-900 border border-gray-700 shadow-2xl text-gray-200 overflow-hidden'
+    : 'w-[360px] max-h-[72vh] flex flex-col rounded-2xl bg-white border border-gray-200 shadow-2xl text-gray-900 overflow-hidden';
   const headerClasses = isDark
-    ? 'flex items-center justify-between px-4 py-3 border-b border-gray-800 cursor-move select-none'
-    : 'flex items-center justify-between px-4 py-3 border-b border-gray-200 cursor-move select-none bg-white';
-  const toolbarBtn = isDark
-    ? 'text-xs px-2 py-1 rounded-md border border-gray-700 hover:bg-gray-900'
-    : 'text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100';
+    ? 'flex items-center justify-between px-4 py-3 border-b border-gray-700 cursor-move select-none bg-gray-800 rounded-t-2xl'
+    : 'flex items-center justify-between px-4 py-3 border-b border-gray-200 cursor-move select-none bg-white rounded-t-2xl';
+  const cameraBtnClasses = isDark
+    ? 'w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-white transition-colors'
+    : 'w-10 h-10 rounded-full bg-purple-200 hover:bg-purple-300 flex items-center justify-center text-purple-700 transition-colors';
+  const sendBtnClasses = isDark
+    ? 'w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-white transition-colors disabled:opacity-50'
+    : 'w-10 h-10 rounded-full bg-purple-200 hover:bg-purple-300 flex items-center justify-center text-purple-700 transition-colors disabled:opacity-50';
   const inputClasses = isDark
-    ? 'flex-1 bg-gray-900 border border-gray-800 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-600 text-gray-100 placeholder:text-gray-400'
-    : 'flex-1 bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 text-gray-900 placeholder:text-gray-500';
+    ? 'flex-1 bg-gray-800 border-0 rounded-full px-4 py-2 text-sm focus:outline-none text-gray-100 placeholder:text-gray-500'
+    : 'flex-1 bg-gray-100 border-0 rounded-full px-4 py-2 text-sm focus:outline-none text-gray-900 placeholder:text-gray-500';
 
   return (
     <div className="fixed z-[60]" style={{ left: pos.x, top: pos.y, fontFamily: 'Montserrat, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif' }}>
@@ -188,35 +237,25 @@ export const TooltipBotWidget: React.FC = () => {
         <div ref={(el) => { containerRef.current = el; widgetRef.current = el; }} className={containerClasses}>
           <div className={headerClasses} onMouseDown={startDragFromHeader}>
             <div className="flex items-center gap-2 font-semibold">
-              <img src="/glippy.png" alt="Glippy" className="w-6 h-6 rounded" />
-              ToolTip Assistant (Demo)
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+              Tooltip Companion
             </div>
             <div className="flex items-center gap-2">
               <button
                 title="Toggle theme"
                 onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
-                className={isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}
+                className={isDark ? 'text-yellow-500 hover:text-yellow-400' : 'text-gray-600 hover:text-gray-900'}
               >
-                {isDark ? '🌙' : '☀️'}
+                {isDark ? '☀️' : '🌙'}
               </button>
               <button onClick={() => setOpen(false)} className={isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-800'}>✕</button>
             </div>
           </div>
-          <div className={isDark ? 'px-3 py-2 border-b border-gray-800 flex items-center gap-2 flex-wrap' : 'px-3 py-2 border-b border-gray-200 flex items-center gap-2 flex-wrap bg-white'}>
-            <button onClick={() => {
-              const list = scanPageActions();
-              const text = list.length ? `Detected ${list.length} actions. Top examples:\n` + list.slice(0, 8).map(a => `- ${a.type === 'link' ? 'Link' : 'Button'}: ${a.label}${a.href ? ` → ${a.href}` : ''}`).join('\n') : 'No actions detected.';
-              setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: text }]);
-            }} className={toolbarBtn}>Detect Actions</button>
-            <button onClick={() => {
-              const text = summarizePage() || 'No summary info available.';
-              setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: text }]);
-            }} className={toolbarBtn}>Summarize Page</button>
-            <button onClick={() => setMessages([])} className={toolbarBtn}>Clear</button>
-          </div>
-          <div className="flex-1 overflow-auto p-3 space-y-2">
+          <div className={`flex-1 overflow-auto p-3 space-y-2 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
             {messages.length === 0 && (
-              <div className={isDark ? 'text-sm text-gray-400' : 'text-sm text-gray-600'}>
+              <div className={isDark ? 'text-sm text-gray-400' : 'text-sm text-gray-500'}>
                 Ask something like: "What does this button do?" or "Summarize this page".
               </div>
             )}
@@ -228,21 +267,57 @@ export const TooltipBotWidget: React.FC = () => {
               </div>
             ))}
           </div>
-          <div className={isDark ? 'p-3 border-t border-gray-800 flex items-center gap-2' : 'p-3 border-t border-gray-200 flex items-center gap-2 bg-white'}>
+          <div className={isDark ? 'p-3 border-t border-gray-700 flex items-center gap-2 bg-gray-900 rounded-b-2xl' : 'p-3 border-t border-gray-200 flex items-center gap-2 bg-white rounded-b-2xl'}>
+            <button
+              title="Attach image"
+              className={cameraBtnClasses}
+              onClick={() => {
+                const ocrMessage = `🔍 **Image Recognition & OCR Capabilities**
+
+The Tooltip Companion extension includes powerful image recognition and OCR (Optical Character Recognition) features:
+
+**Features:**
+• **Screenshot Capture**: Capture screenshots of web pages when hovering over links
+• **OCR Processing**: Extract text from images and screenshots using your configured backend
+• **Image Analysis**: Process images to understand content and context
+• **Backend Integration**: Connect to your own backend service for OCR processing
+
+**How it works:**
+1. Screenshots are captured automatically when you hover over links
+2. Images are processed by your configured backend service
+3. OCR extracts readable text from images
+4. Results are cached locally in your browser's IndexedDB
+
+**Configuration:**
+• Set your backend URL in extension options (right-click icon → Options)
+• Default backend: http://localhost:3000 (you can use your own)
+• All processing happens through your configured backend service
+
+For more details, visit the [GitHub repository](https://github.com/mcpmessenger/Tooltip-Companion-Chrome-Extension).`;
+                setMessages(prev => [...prev, { id: generateUUID(), role: 'assistant', content: ocrMessage }]);
+              }}
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 00-1 1v14a1 1 0 001 1h16a1 1 0 001-1V5a1 1 0 00-1-1h-3.382l-.724-1.447A1 1 0 0015 2H9zM12 8a4 4 0 100 8 4 4 0 000-8zm0 2a2 2 0 110 4 2 2 0 010-4zm-5 5a1 1 0 100-2 1 1 0 000 2z" />
+              </svg>
+            </button>
             <input
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') handleSend(); }}
-              placeholder={busy ? 'Thinking…' : 'Type a message'}
+              placeholder={busy ? 'Thinking…' : 'Type a message...'}
               disabled={busy}
               className={inputClasses}
             />
             <button
               onClick={handleSend}
-              disabled={busy}
-              className={isDark ? 'rounded-md bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-3 py-2 text-sm text-white' : 'rounded-md bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-3 py-2 text-sm text-white'}
+              disabled={busy || !input.trim()}
+              className={sendBtnClasses}
+              title="Send message"
             >
-              Send
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
             </button>
           </div>
         </div>

@@ -1,21 +1,15 @@
 import React from 'react';
 import { AuroraHero } from '../components/ui/futurastic-hero-section';
 import { ScrapingProvider } from '../contexts/ScrapingContext';
-import ProjectShowcase from '../components/ProjectShowcase';
-import { TooltipBotWidget } from '../components/TooltipBotWidget';
+import Footer from '../components/Footer';
 
 const DashboardContent: React.FC = () => {
   return (
     <div className="min-h-screen relative">
       <AuroraHero 
-        hideText={false} 
-        onGetStarted={() => {}} 
-        useProactiveMode={false}
+        hideText={false}
       />
-      
-      <ProjectShowcase />
-      
-      <TooltipBotWidget />
+      <Footer />
     </div>
   );
 };
