@@ -185,7 +185,11 @@ backend/screenshots/
 *.gif
 
 # Screenshots and development images - keep only essential assets
+# Ignore all screenshots by default
 public/Screenshot*.png
+# But allow specific screenshots needed for tooltips
+!public/Screenshot 2025-10-30 205611.png
+!public/Screenshot 2025-10-30 205643.png
 
 # Deployment logs and archives
 Deployment-*/
