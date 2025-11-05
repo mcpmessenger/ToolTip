@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
 
 type ChatMessage = {
   id: string;
@@ -46,6 +46,24 @@ export const TooltipBotWidget: React.FC = () => {
   const dragOffset = useRef<{x:number;y:number}>({x:0,y:0});
   const [pos, setPos] = useState<{x:number;y:number}>({ x: window.innerWidth - 76, y: window.innerHeight - 96 });
   const dragMoved = useRef(false);
+  const [containerWidth, setContainerWidth] = useState<number>(Math.min(360, window.innerWidth - 16));
+
+  const clampToViewport = () => {
+    if (!widgetRef.current) return;
+    const rect = widgetRef.current.getBoundingClientRect();
+    const margin = 8;
+    let newX = pos.x;
+    let newY = pos.y;
+    const maxX = window.innerWidth - rect.width - margin;
+    if (newX > maxX) newX = Math.max(margin, maxX);
+    if (newX < margin) newX = margin;
+    const maxY = window.innerHeight - rect.height - margin;
+    if (newY > maxY) newY = Math.max(margin, maxY);
+    if (newY < margin) newY = margin;
+    if (newX !== pos.x || newY !== pos.y) {
+      setPos({ x: newX, y: newY });
+    }
+  };
 
   const scanPageActions = () => {
     const result: PageAction[] = [];
@@ -180,6 +198,24 @@ Need help with backend setup? Check the GitHub repository for detailed instructi
     };
   }, [dragging]);
 
+  // Ensure widget opens fully visible (especially on mobile) and stays clamped on resize
+  useLayoutEffect(() => {
+    if (open) {
+      clampToViewport();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, containerWidth]);
+
+  useEffect(() => {
+    const onResize = () => {
+      setContainerWidth(Math.min(360, window.innerWidth - 16));
+      if (open) clampToViewport();
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   const startDragFromToggle = (e: React.MouseEvent) => {
     if (!toggleRef.current) return;
     const rect = toggleRef.current.getBoundingClientRect();
@@ -234,7 +270,7 @@ Need help with backend setup? Check the GitHub repository for detailed instructi
         />
       )}
       {open && (
-        <div ref={(el) => { containerRef.current = el; widgetRef.current = el; }} className={containerClasses}>
+        <div ref={(el) => { containerRef.current = el; widgetRef.current = el; }} className={containerClasses} style={{ width: containerWidth }}>
           <div className={headerClasses} onMouseDown={startDragFromHeader}>
             <div className="flex items-center gap-2 font-semibold">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
