@@ -6,7 +6,6 @@ import {
   motion,
   animate,
 } from "framer-motion";
-import { SimplePreviewTooltip } from "../SimplePreviewTooltip";
 import ImagePreviewTooltip from "../ImagePreviewTooltip";
 
 const COLORS_TOP = ["#13FFAA", "#1E67C6", "#CE84CF", "#DD335C"];
@@ -80,39 +79,34 @@ export const AuroraHero = ({ hideText = false, onGetStarted, useProactiveMode = 
           </motion.p>
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
             <ImagePreviewTooltip
-              imageSrc="/Screenshot 2025-11-06 164024.png"
+              imageSrc="/extension-tooltip-preview.png"
               alt="ToolTip Companion Chrome extension preview"
             >
-              <SimplePreviewTooltip
-                targetUrl="https://chromewebstore.google.com/detail/behmdnonpdlamifmfpdmhgcgcljfiooj?utm_source=item-share-cb"
-                elementId="get-started-button"
+              <motion.a
+                id="get-started-button"
+                href="https://chromewebstore.google.com/detail/behmdnonpdlamifmfpdmhgcgcljfiooj?utm_source=item-share-cb"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={onGetStarted}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                style={{
+                  border,
+                  boxShadow,
+                }}
+                whileHover={{
+                  scale: 1.015,
+                }}
+                whileTap={{
+                  scale: 0.985,
+                }}
+                className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-6 py-3 text-gray-50 transition-colors hover:bg-gray-950/50 text-lg font-semibold"
+                title="Download the ToolTip Companion Chrome extension"
               >
-                <motion.a
-                  id="get-started-button"
-                  href="https://chromewebstore.google.com/detail/behmdnonpdlamifmfpdmhgcgcljfiooj?utm_source=item-share-cb"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={onGetStarted}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 }}
-                  style={{
-                    border,
-                    boxShadow,
-                  }}
-                  whileHover={{
-                    scale: 1.015,
-                  }}
-                  whileTap={{
-                    scale: 0.985,
-                  }}
-                  className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-6 py-3 text-gray-50 transition-colors hover:bg-gray-950/50 text-lg font-semibold"
-                  title="Try the ToolTip Companion Chrome extension"
-                >
-                  Try the Extension
-                  <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
-                </motion.a>
-              </SimplePreviewTooltip>
+                Download the Chrome Extension
+                <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
+              </motion.a>
             </ImagePreviewTooltip>
 
             <ImagePreviewTooltip

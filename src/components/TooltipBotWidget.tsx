@@ -308,28 +308,21 @@ Need help with backend setup? Check the GitHub repository for detailed instructi
               title="Attach image"
               className={cameraBtnClasses}
               onClick={() => {
-                const ocrMessage = `🔍 **Image Recognition & OCR Capabilities**
+                const ocrMessage = `✨ **What the ToolTip Companion Chrome Extension Delivers**
 
-The Tooltip Companion extension includes powerful image recognition and OCR (Optical Character Recognition) features:
+**Highlighted benefits**
+• Instant, trustworthy link previews before you click  
+• AI-powered summaries and follow-up actions in context  
+• Smart screenshot capture with built-in OCR—no setup required  
+• Privacy-first: processing runs through our managed backend
 
-**Features:**
-• **Screenshot Capture**: Capture screenshots of web pages when hovering over links
-• **OCR Processing**: Extract text from images and screenshots using your configured backend
-• **Image Analysis**: Process images to understand content and context
-• **Backend Integration**: Connect to your own backend service for OCR processing
+**How it works**
+1. Hover over a link to trigger a live preview overlay  
+2. Ask follow-up questions or request a summary right inside the tooltip  
+3. Capture and translate on-page visuals with one click  
+4. Save time by acting on insights without leaving the tab
 
-**How it works:**
-1. Screenshots are captured automatically when you hover over links
-2. Images are processed by your configured backend service
-3. OCR extracts readable text from images
-4. Results are cached locally in your browser's IndexedDB
-
-**Configuration:**
-• Set your backend URL in extension options (right-click icon → Options)
-• Default backend: http://localhost:3000 (you can use your own)
-• All processing happens through your configured backend service
-
-For more details, visit the [GitHub repository](https://github.com/mcpmessenger/Tooltip-Companion-Chrome-Extension).`;
+Ready to try it? 👉 [Download the Chrome extension](https://chromewebstore.google.com/detail/behmdnonpdlamifmfpdmhgcgcljfiooj).`;
                 setMessages(prev => [...prev, { id: generateUUID(), role: 'assistant', content: ocrMessage }]);
               }}
             >
