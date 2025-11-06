@@ -47,9 +47,9 @@ export const SimplePreviewTooltip: React.FC<SimplePreviewTooltipProps> = ({
             whiteSpace: 'nowrap'
           }}
         >
-          {targetUrl.includes('github.com') ? 'View TeenyAI on GitHub' : 
-           targetUrl.includes('chromewebstore') ? 'Install Chrome Extension' : 
-           'Click to explore'}
+          {targetUrl.includes('github.com')
+            ? 'View TeenyAI on GitHub'
+            : 'Click to explore'}
         </div>
       )}
     </div>

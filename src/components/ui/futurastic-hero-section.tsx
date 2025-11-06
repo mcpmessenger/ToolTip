@@ -79,34 +79,42 @@ export const AuroraHero = ({ hideText = false, onGetStarted, useProactiveMode = 
             Intelligent tooltips and visual feedback for enhanced web interactions
           </motion.p>
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <SimplePreviewTooltip
-              targetUrl={window.location.href}
-              elementId="get-started-button"
+            <ImagePreviewTooltip
+              imageSrc="/Screenshot 2025-11-06 164024.png"
+              alt="ToolTip Companion Chrome extension preview"
             >
-              <motion.button
-                id="get-started-button"
-                onClick={onGetStarted}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                style={{
-                  border,
-                  boxShadow,
-                }}
-                whileHover={{
-                  scale: 1.015,
-                }}
-                whileTap={{
-                  scale: 0.985,
-                }}
-                className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-6 py-3 text-gray-50 transition-colors hover:bg-gray-950/50 text-lg font-semibold"
-                title="Get Started - Hover to see animated preview"
+              <SimplePreviewTooltip
+                targetUrl="https://chromewebstore.google.com/detail/behmdnonpdlamifmfpdmhgcgcljfiooj?utm_source=item-share-cb"
+                elementId="get-started-button"
               >
-                Get Started
-                <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
-              </motion.button>
-            </SimplePreviewTooltip>
-            
+                <motion.a
+                  id="get-started-button"
+                  href="https://chromewebstore.google.com/detail/behmdnonpdlamifmfpdmhgcgcljfiooj?utm_source=item-share-cb"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={onGetStarted}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  style={{
+                    border,
+                    boxShadow,
+                  }}
+                  whileHover={{
+                    scale: 1.015,
+                  }}
+                  whileTap={{
+                    scale: 0.985,
+                  }}
+                  className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-6 py-3 text-gray-50 transition-colors hover:bg-gray-950/50 text-lg font-semibold"
+                  title="Try the ToolTip Companion Chrome extension"
+                >
+                  Try the Extension
+                  <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
+                </motion.a>
+              </SimplePreviewTooltip>
+            </ImagePreviewTooltip>
+
             <ImagePreviewTooltip
               imageSrc="/Screenshot 2025-10-30 205611.png"
               alt="GitHub Extension Repository Preview"
